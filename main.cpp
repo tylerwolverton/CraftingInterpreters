@@ -4,25 +4,27 @@
 
 #include "Scanner.h"
 
-void run(std::string source) {
+bool run(std::string source) {
 	auto scanner = Scanner(source);
 	auto tokens = scanner.ScanTokens();
 
 	// For now, just print the tokens.        
-	for (const auto& token : tokens) 
+	for (const auto& token : *tokens) 
 	{
-		std::cout << token.ToString() << std::endl;
+		//std::cout << token.ToString() << std::endl;
 	}
+
+	return true;
 }
 
-void runFile(char* script)
+bool runFile(char* script)
 {
 	// read file into memory
 	std::ifstream inFile(script);
 	if (!inFile.is_open())
 	{
 		std::cout << "Input file couldn't be opened\n";
-		return;
+		return false;
 	}
 
 	/*std::streampos fileSize = inFile.tellg();
@@ -36,7 +38,16 @@ void runFile(char* script)
 	buffer << inFile.rdbuf();
 	inFile.close();
 
-	run(buffer.str());
+	return run(buffer.str());
+}
+
+void report(int line, std::string where, std::string message) {
+	std::cout << "[line " << line << "] Error" << where << ": " << message << std::endl;
+}
+
+void error(int line, std::string message) 
+{
+	report(line, "", message);
 }
 
 int main(int argc, char *argv[]) 
@@ -48,7 +59,10 @@ int main(int argc, char *argv[])
 	}
 	else if (argc == 2) 
 	{
-		runFile(argv[1]);
+		if (!runFile(argv[1]))
+		{
+
+		}
 	}
 	else 
 	{

@@ -1,6 +1,8 @@
 #pragma once
-#include <string>
+#include "Types.h"
 #include <vector>
+#include <map>
+#include <memory>
 
 class Scanner
 {
@@ -8,20 +10,33 @@ public:
 	Scanner(std::string source);
 	~Scanner();
 
-	class Token
-	{
-	public:
-		std::string tokenStr;
-		Token(std::string token)
-			: tokenStr(token)
-		{}
-
-		const std::string ToString() const { return tokenStr; }
-	};
-
-	std::vector<Token> ScanTokens();
+	std::shared_ptr<std::vector<Token>> ScanTokens();
 
 private:
-	std::string loxSource;
+	std::string m_loxSource;
+	std::shared_ptr<std::vector<Token>> m_tokens;
+	std::shared_ptr<std::map<std::string, ETokenType>> m_keywords;
+	int m_startIdx = 0;
+	int m_curIdx = 0;
+	int m_lineNum = 1;
+
+	void initKeywords();
+
+	void scanToken();
+	char advance();
+	bool match(char expected);
+	char peek();
+	char peekNext();
+
+	void addToken(ETokenType type);
+
+	bool isAtEnd();
+	bool isDigit(char c);
+	bool isAlpha(char c);
+	bool isAlphaNumeric(char c);
+
+	void processString();
+	void processNumber();
+	void processIdentifier();
 };
 
