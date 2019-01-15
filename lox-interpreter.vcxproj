@@ -121,10 +121,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AstPrinter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AstPrinter.h" />
     <ClInclude Include="Expr.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="Types.h" />
