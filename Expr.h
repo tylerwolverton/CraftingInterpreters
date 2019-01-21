@@ -1,81 +1,82 @@
 #include "Types.h"
+#include <memory>
 
-    template <typename T>
-    class Visitor;
+    class BinaryExpr;
+
+    class GroupingExpr;
+
+    class LiteralExpr;
+
+    class UnaryExpr;
+
+class Visitor { 
+public:
+    virtual void visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr, const std::shared_ptr<std::string>& returnData) = 0;
+    virtual void visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr, const std::shared_ptr<std::string>& returnData) = 0;
+    virtual void visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr, const std::shared_ptr<std::string>& returnData) = 0;
+    virtual void visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr, const std::shared_ptr<std::string>& returnData) = 0;
+    };
 
 class Expr {
-    template <typename T>
-    T accept(Visitor<T> visitor);
+    public:
+    virtual void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) {}
 };
 
-  class Binary : Expr {
+  class BinaryExpr : public Expr {
     public:
-    Binary( Expr left, Token op, Expr right ) 
+    BinaryExpr( std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right ) 
       : m_left(left),
       m_op(op),
       m_right(right)
         {}
 
-    template <typename T>
-    T accept(Visitor<T> visitor) {
-        return visitor.visitBinaryExpr(this);
+    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {
+        visitor.visitBinaryExpr(std::make_shared<BinaryExpr>(*this), returnStr);
     }
-      Expr m_left;
+      std::shared_ptr<Expr> m_left;
       Token m_op;
-      Expr m_right;
+      std::shared_ptr<Expr> m_right;
 
   };
 
-  class Grouping : Expr {
+  class GroupingExpr : public Expr {
     public:
-    Grouping( Expr expr ) 
+    GroupingExpr( std::shared_ptr<Expr> expr ) 
       : m_expr(expr)
         {}
 
-    template <typename T>
-    T accept(Visitor<T> visitor) {
-        return visitor.visitGroupingExpr(this);
+    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {
+        visitor.visitGroupingExpr(std::make_shared<GroupingExpr>(*this), returnStr);
     }
-      Expr m_expr;
+      std::shared_ptr<Expr> m_expr;
 
   };
 
-  class Literal : Expr {
+  class LiteralExpr : public Expr {
     public:
-    Literal( Token literal ) 
+    LiteralExpr( Token literal ) 
       : m_literal(literal)
         {}
 
-    template <typename T>
-    T accept(Visitor<T> visitor) {
-        return visitor.visitLiteralExpr(this);
+    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {
+        visitor.visitLiteralExpr(std::make_shared<LiteralExpr>(*this), returnStr);
     }
       Token m_literal;
 
   };
 
-  class Unary : Expr {
+  class UnaryExpr : public Expr {
     public:
-    Unary( Token op, Expr right ) 
+    UnaryExpr( Token op, std::shared_ptr<Expr> right ) 
       : m_op(op),
       m_right(right)
         {}
 
-    template <typename T>
-    T accept(Visitor<T> visitor) {
-        return visitor.visitUnaryExpr(this);
+    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {
+        visitor.visitUnaryExpr(std::make_shared<UnaryExpr>(*this), returnStr);
     }
       Token m_op;
-      Expr m_right;
+      std::shared_ptr<Expr> m_right;
 
   };
-
-    template <typename T>
-    class Visitor { 
-    public:
-        T visitBinaryExpr(Binary expr);
-        T visitGroupingExpr(Grouping expr);
-        T visitLiteralExpr(Literal expr);
-        T visitUnaryExpr(Unary expr);
-    };
 

@@ -10,16 +10,15 @@ void defineVisitor(std::stringstream& buffer,
 				   std::string baseName,
 				   std::vector<std::string> types)
 {
-	buffer << "    template <typename T>\n";
-	buffer << "    class Visitor { \n";
-	buffer << "    public:\n";
+	buffer << "class Visitor { \n";
+	buffer << "public:\n";
 
 	for (auto type : types)
 	{
 		auto typeName = type.substr(0, type.find_first_of(" "));
 		auto baseNameLower = baseName;
 		std::transform(baseNameLower.begin(), baseNameLower.end(), baseNameLower.begin(), ::tolower);
-		buffer << "        T visit" << typeName << baseName << "(" << typeName << " " << baseNameLower << ");\n";
+		buffer << "    virtual void visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ", const std::shared_ptr<std::string>& returnData) = 0;\n";
 	}
 
 	buffer << "    };\n\n";
@@ -31,7 +30,7 @@ void defineType(std::stringstream& buffer,
 				std::string fields,
 				std::vector<std::string> fieldVec)
 {
-	buffer << "  class " << className << " : " << baseName << " {\n";
+	buffer << "  class " << className << " : public " << baseName << " {\n";
 	buffer << "    public:\n";
 	
 	// Constructor
@@ -52,9 +51,8 @@ void defineType(std::stringstream& buffer,
 
 	buffer << "  {}\n\n";
 
-	buffer << "    template <typename T>\n";
-	buffer << "    T accept(Visitor<T> visitor) {\n";
-	buffer << "        return visitor.visit" << className << baseName << "(this);\n";
+	buffer << "    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {\n";
+	buffer << "        visitor.visit" << className << "(std::make_shared<" << className << ">(*this), returnStr);\n";
 	buffer << "    }\n";
 
 	// Local variables
@@ -77,14 +75,22 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 	}
 
 	std::stringstream buffer;
-	buffer << "#include \"Types.h\"\n\n";
-	buffer << "    template <typename T>\n";
-	buffer << "    class Visitor;\n\n";
+	buffer << "#include \"Types.h\"\n";
+	buffer << "#include <memory>\n\n";
+
+	// Forward declarations fro expr types
+	for (const auto& type : types)
+	{
+		std::string className = type.substr(0, type.find_first_of(" "));
+		buffer << "    class " << className << ";\n\n";
+	}
+
+	defineVisitor(buffer, baseName, types);
 
 	// Define base class
 	buffer << "class " << baseName << " {\n";
-	buffer << "    template <typename T>\n";
-	buffer << "    T accept(Visitor<T> visitor);\n";
+	buffer << "    public:\n";
+	buffer << "    virtual void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) {}\n";
 	buffer << "};\n\n";
 
 	// Define each subclass
@@ -103,8 +109,6 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 		defineType(buffer, baseName, className, fields, fieldVec);
 	}
 
-	defineVisitor(buffer, baseName, types);
-
 	outFile.write((buffer.str()).c_str(), strlen((buffer.str()).c_str()));
 
 	return true;
@@ -120,10 +124,10 @@ int main(int argc, char *argv[])
 
 	std::string outputDir = argv[1];
 	if (defineAst(outputDir, "Expr", std::vector<std::string>{
-		"Binary   : Expr left, Token op, Expr right",
-		"Grouping : Expr expr",
-		"Literal  : Token literal",
-		"Unary    : Token op, Expr right"
+		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
+		"GroupingExpr : std::shared_ptr<Expr> expr",
+		"LiteralExpr  : Token literal",
+		"UnaryExpr    : Token op, std::shared_ptr<Expr> right"
 	}) == false)
 	{
 		std::cout << "Generation failed\n";

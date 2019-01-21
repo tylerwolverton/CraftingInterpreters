@@ -8,3 +8,5 @@
 *.obj
 *.idb
 .vs/lox-interpreter/v14/.suo
+*.tss
+.vs/lox-interpreter/v14/.suo
