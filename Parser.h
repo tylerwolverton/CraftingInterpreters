@@ -11,6 +11,8 @@ public:
 	Parser(const std::shared_ptr<std::vector<Token>>& tokens);
 	~Parser();
 
+	std::shared_ptr<Expr> Parse();
+
 private:
 	std::shared_ptr<std::vector<Token>> m_tokens;
 	int m_curIdx = 0;
@@ -28,6 +30,8 @@ private:
 	Token advance();
 	Token peek();
 	Token previous();
+	Token consume(const ETokenType& type, const std::string& msg);
+	void synchronize();
 	bool isAtEnd();
 };
 

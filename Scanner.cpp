@@ -1,4 +1,5 @@
 #include "Scanner.h"
+#include "Error.h"
 
 Scanner::Scanner(std::string source)
 	: m_loxSource(source)
@@ -113,7 +114,7 @@ void Scanner::scanToken()
 			}
 			else 
 			{
-				//Lox.error(line, "Unexpected character.");
+				Error::DisplayError(m_lineNum, "Unexpected character.");
 			}
 			break;
 	}

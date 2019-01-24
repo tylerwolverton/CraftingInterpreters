@@ -128,6 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AstPrinter.h" />
+    <ClInclude Include="Error.h" />
     <ClInclude Include="Expr.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Scanner.h" />

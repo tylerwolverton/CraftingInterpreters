@@ -1,1 +1,7 @@
-Hello there, I'm a lox program!
+// this is a comment
+var language = "lox";
+var i = 5;
+var j = 6;
+var k = 7;
+
+var result = (5 + 6) * 7;

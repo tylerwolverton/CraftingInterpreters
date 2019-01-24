@@ -75,6 +75,7 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 	}
 
 	std::stringstream buffer;
+	buffer << "#pragma once\n";
 	buffer << "#include \"Types.h\"\n";
 	buffer << "#include <memory>\n\n";
 
