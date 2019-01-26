@@ -158,9 +158,20 @@ char Scanner::peekNext()
 	return m_loxSource[m_curIdx + 1];
 }
 
-void Scanner::addToken(ETokenType type)
+void Scanner::addToken(ETokenType type, int startIdx, int endIdx)
 {
-	std::string text = m_loxSource.substr(m_startIdx, m_curIdx);
+	if (startIdx == -1)
+	{
+		startIdx = m_startIdx;
+	}
+	if (endIdx == -1)
+	{
+		endIdx = m_curIdx;
+	}
+
+	std::string text = m_loxSource.substr(startIdx, endIdx - startIdx);
+
+	//std::cout << "Adding Token: " << type << " '" << text << "' : " << m_lineNum << "\n";
 	m_tokens->emplace_back(type, text, m_lineNum);
 }
 
@@ -207,7 +218,7 @@ void Scanner::processString()
 	// closing "
 	advance();
 
-	addToken(ETokenType::STRING);	
+	addToken(ETokenType::STRING, m_startIdx + 1, m_curIdx - 1);	
 }
 
 void Scanner::processNumber()
@@ -236,7 +247,7 @@ void Scanner::processIdentifier()
 	while (isAlphaNumeric(peek())) 
 		advance();
 
-	std::string text = m_loxSource.substr(m_startIdx, m_curIdx);
+	std::string text = m_loxSource.substr(m_startIdx, m_curIdx - m_startIdx);
 
 	ETokenType type;
 	auto iter = m_keywords->find(text);

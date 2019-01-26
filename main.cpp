@@ -10,15 +10,21 @@ bool run(std::string source) {
 	auto scanner = Scanner(source);
 	auto tokens = scanner.ScanTokens();
 
-	std::cout << "Tokens:\n";
+	//std::cout << "Tokens:\n";
 	for (auto& token : *tokens)
 	{
-		std::cout << token.GetLineNum() << ": type: " << token.GetType() << " lexeme: " << token.GetLexeme() << "\n";
+		//std::cout << token.GetLineNum() << ": type: " << token.GetType() << " lexeme: " << token.GetLexeme() << "\n";
 	}
 
 	std::cout << "AST Tree";
 	auto parser = Parser(tokens);
 	auto expr = parser.Parse();
+
+	if (expr == nullptr)
+	{
+		return false;
+	}
+
 	std::cout << AstPrinter().Print(expr);
 
 	return true;

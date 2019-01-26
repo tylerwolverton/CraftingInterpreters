@@ -29,7 +29,7 @@ private:
 	char peek();
 	char peekNext();
 
-	void addToken(ETokenType type);
+	void addToken(ETokenType type, int startIdx = -1, int endIdx = -1);
 
 	bool isAtEnd();
 	bool isDigit(char c);

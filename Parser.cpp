@@ -33,7 +33,9 @@ std::shared_ptr<Expr> Parser::equality()
 
 	while (match(std::vector<ETokenType>{ ETokenType::BANG_EQUAL, ETokenType::EQUAL_EQUAL }))
 	{
-		expr = std::make_shared<BinaryExpr>(expr, previous(), comparison());
+		Token token = previous();
+		std::shared_ptr<Expr> right = comparison();
+		expr = std::make_shared<BinaryExpr>(expr, token, right);
 	}
 
 	return expr;
@@ -45,7 +47,9 @@ std::shared_ptr<Expr> Parser::comparison()
 
 	while (match(std::vector<ETokenType>{ ETokenType::GREATER, ETokenType::GREATER_EQUAL, ETokenType::LESS, ETokenType::LESS_EQUAL }))
 	{
-		expr = std::make_shared<BinaryExpr>(expr, previous(), addition());
+		Token token = previous();
+		std::shared_ptr<Expr> right = addition();
+		expr = std::make_shared<BinaryExpr>(expr, token, right);
 	}
 
 	return expr;
@@ -57,7 +61,9 @@ std::shared_ptr<Expr> Parser::addition()
 
 	while (match(std::vector<ETokenType>{ ETokenType::PLUS, ETokenType::MINUS }))
 	{
-		expr = std::make_shared<BinaryExpr>(expr, previous(), multiplication());
+		Token token = previous();
+		std::shared_ptr<Expr> right = multiplication();
+		expr = std::make_shared<BinaryExpr>(expr, token, right);
 	}
 
 	return expr;
@@ -69,7 +75,9 @@ std::shared_ptr<Expr> Parser::multiplication()
 
 	while (match(std::vector<ETokenType>{ ETokenType::SLASH, ETokenType::STAR }))
 	{
-		expr = std::make_shared<BinaryExpr>(expr, previous(), unary());
+		Token token = previous();
+		std::shared_ptr<Expr> right = unary();
+		expr = std::make_shared<BinaryExpr>(expr, token, right);
 	}
 
 	return expr;
@@ -79,7 +87,9 @@ std::shared_ptr<Expr> Parser::unary()
 {
 	if (match(std::vector<ETokenType>{ ETokenType::BANG, ETokenType::MINUS }))
 	{
-		return std::make_shared<UnaryExpr>(previous(), unary());
+		Token token = previous();
+		std::shared_ptr<Expr> right = unary();
+		return std::make_shared<UnaryExpr>(token, right);
 	}
 
 	return primary();
