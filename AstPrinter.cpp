@@ -12,35 +12,35 @@ AstPrinter::~AstPrinter()
 
 std::string AstPrinter::Print(const std::shared_ptr<Expr>& expr)
 {
-	std::shared_ptr<std::string> returnStr = std::make_shared<std::string>("");
-	expr->accept(*this, returnStr);
-	return *returnStr;
+	return *(std::static_pointer_cast<std::string>(expr->accept(*this)));
 }
 
-void AstPrinter::visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr, const std::shared_ptr<std::string>& returnStr)
+std::shared_ptr<void> AstPrinter::visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr)
 {
-	*returnStr = parenthesize(expr->m_op.GetLexeme(), std::vector<std::shared_ptr<Expr>>{expr->m_left, expr->m_right});
+	return parenthesize(expr->m_op.GetLexeme(), std::vector<std::shared_ptr<Expr>>{expr->m_left, expr->m_right});
 }
 
-void AstPrinter::visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr, const std::shared_ptr<std::string>& returnStr)
+std::shared_ptr<void> AstPrinter::visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr)
 {
-	*returnStr = parenthesize("group", std::vector<std::shared_ptr<Expr>>{expr->m_expr});
+	return parenthesize("group", std::vector<std::shared_ptr<Expr>>{expr->m_expr});
 }
 
-void AstPrinter::visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr, const std::shared_ptr<std::string>& returnStr)
+std::shared_ptr<void> AstPrinter::visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr)
 {
 	if (expr != nullptr)
 	{
-		*returnStr = expr->m_literal.GetLexeme();
+		return std::make_shared<std::string>(expr->m_literal.GetLexeme());
 	}
+
+	return nullptr;
 }
 
-void AstPrinter::visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr, const std::shared_ptr<std::string>& returnStr)
+std::shared_ptr<void> AstPrinter::visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr)
 {
-	*returnStr = parenthesize(expr->m_op.GetLexeme(), std::vector<std::shared_ptr<Expr>>{expr->m_right});
+	return parenthesize(expr->m_op.GetLexeme(), std::vector<std::shared_ptr<Expr>>{expr->m_right});
 }
 
-std::string AstPrinter::parenthesize(std::string name, std::vector<std::shared_ptr<Expr>> exprs)
+std::shared_ptr<void> AstPrinter::parenthesize(std::string name, std::vector<std::shared_ptr<Expr>> exprs)
 {
 	std::stringstream buffer;
 
@@ -48,11 +48,9 @@ std::string AstPrinter::parenthesize(std::string name, std::vector<std::shared_p
 	for (auto& expr : exprs) 
 	{
 		buffer << " ";
-		std::shared_ptr<std::string> returnStr = std::make_shared<std::string>("");
-		expr->accept(*this, returnStr);
-		buffer << *returnStr;
+		buffer << *(std::static_pointer_cast<std::string>(expr->accept(*this)));
 	}
 	buffer << ")";
 	
-	return buffer.str();
+	return std::make_shared<std::string>(buffer.str());
 }

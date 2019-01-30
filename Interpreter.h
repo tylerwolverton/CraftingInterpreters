@@ -1,15 +1,12 @@
 #pragma once
 #include "Expr.h"
-#include <vector>
-#include <memory>
-
-class AstPrinter : public Visitor
+class Interpreter : public Visitor
 {
 public:
-	AstPrinter();
-	~AstPrinter();
+	Interpreter();
+	~Interpreter();
 
-	std::string Print(const std::shared_ptr<Expr>& expr);
+	void Interpret(const std::shared_ptr<Expr>& expr);
 
 	std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) override;
 	std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) override;
@@ -17,6 +14,6 @@ public:
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
 
 private:
-	std::shared_ptr<void> parenthesize(std::string name, std::vector<std::shared_ptr<Expr>> exprs);
+	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
 };
 

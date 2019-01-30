@@ -18,7 +18,7 @@ void defineVisitor(std::stringstream& buffer,
 		auto typeName = type.substr(0, type.find_first_of(" "));
 		auto baseNameLower = baseName;
 		std::transform(baseNameLower.begin(), baseNameLower.end(), baseNameLower.begin(), ::tolower);
-		buffer << "    virtual void visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ", const std::shared_ptr<std::string>& returnData) = 0;\n";
+		buffer << "    virtual std::shared_ptr<void> visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ") = 0;\n";
 	}
 
 	buffer << "    };\n\n";
@@ -51,8 +51,8 @@ void defineType(std::stringstream& buffer,
 
 	buffer << "  {}\n\n";
 
-	buffer << "    void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) override {\n";
-	buffer << "        visitor.visit" << className << "(std::make_shared<" << className << ">(*this), returnStr);\n";
+	buffer << "    std::shared_ptr<void> accept(Visitor& visitor) override {\n";
+	buffer << "        return visitor.visit" << className << "(std::make_shared<" << className << ">(*this));\n";
 	buffer << "    }\n";
 
 	// Local variables
@@ -83,15 +83,17 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 	for (const auto& type : types)
 	{
 		std::string className = type.substr(0, type.find_first_of(" "));
-		buffer << "    class " << className << ";\n\n";
+		buffer << "class " << className << ";\n";
 	}
+
+	buffer << "\n";
 
 	defineVisitor(buffer, baseName, types);
 
 	// Define base class
 	buffer << "class " << baseName << " {\n";
 	buffer << "    public:\n";
-	buffer << "    virtual void accept(Visitor& visitor, const std::shared_ptr<std::string>& returnStr) {}\n";
+	buffer << "    virtual std::shared_ptr<void> accept(Visitor& visitor) {}\n";
 	buffer << "};\n\n";
 
 	// Define each subclass
