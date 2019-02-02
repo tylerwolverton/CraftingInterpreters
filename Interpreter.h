@@ -15,5 +15,7 @@ public:
 
 private:
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
+	bool isTruthy(std::shared_ptr<Token> token);
+	bool isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right);
 };
 

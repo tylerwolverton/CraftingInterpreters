@@ -36,6 +36,9 @@ public:
 	std::string GetLexeme() { return m_lexeme; }
 	int GetLineNum() { return m_lineNum; }
 
+	double GetLexemeAsDouble() { return atof(m_lexeme.c_str()); }
+	std::string GetLexemeAsString() { return m_lexeme.substr(1, m_lexeme.size() - 1); }
+
 	/*template <typename T>
 	T GetLiteralValue()
 	{
