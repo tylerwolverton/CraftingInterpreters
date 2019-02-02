@@ -5,6 +5,7 @@
 #include "Scanner.h"
 #include "Parser.h"
 #include "AstPrinter.h"
+#include "Interpreter.h"
 
 bool run(std::string source) {
 	auto scanner = Scanner(source);
@@ -16,7 +17,7 @@ bool run(std::string source) {
 		//std::cout << token.GetLineNum() << ": type: " << token.GetType() << " lexeme: " << token.GetLexeme() << "\n";
 	}
 
-	std::cout << "AST Tree";
+	std::cout << "AST Tree:\n";
 	auto parser = Parser(tokens);
 	auto expr = parser.Parse();
 
@@ -26,6 +27,9 @@ bool run(std::string source) {
 	}
 
 	std::cout << AstPrinter().Print(expr);
+
+	std::cout << "\nResult: ";
+	Interpreter().Interpret(expr);
 
 	return true;
 }

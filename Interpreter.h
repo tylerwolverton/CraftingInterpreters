@@ -17,5 +17,9 @@ private:
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
 	bool isTruthy(std::shared_ptr<Token> token);
 	bool isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right);
+
+	std::shared_ptr<Token> createTruthToken(bool value, int lineNum);
+	std::shared_ptr<Token> createNumberToken(double value, int lineNum);
+	std::shared_ptr<Token> createStringToken(std::string value, int lineNum);
 };
 

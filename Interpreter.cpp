@@ -1,5 +1,7 @@
 #include "Interpreter.h"
 
+#include <iostream>
+
 Interpreter::Interpreter()
 {
 }
@@ -10,7 +12,17 @@ Interpreter::~Interpreter()
 
 void Interpreter::Interpret(const std::shared_ptr<Expr>& expr)
 {
-	auto value = evaluate(expr);
+	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr));
+
+	switch (value->GetType())
+	{
+		case ETokenType::NUMBER:
+			std::cout << value->GetLexemeAsDouble() << "\n";
+			break;
+		default:
+			std::cout << value->GetLexeme() << "\n";
+			break;
+	}
 }
 
 std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr)
@@ -29,25 +41,24 @@ std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryE
 	if (left->GetType() == ETokenType::NUMBER
 		&& right->GetType() == ETokenType::NUMBER)
 	{
-
 		switch (expr->m_op.GetType())
 		{
 			case ETokenType::GREATER:
-				return std::make_shared<double>(left->GetLexemeAsDouble() > right->GetLexemeAsDouble());
+				return createTruthToken(left->GetLexemeAsDouble() > right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::GREATER_EQUAL:
-				return std::make_shared<double>(left->GetLexemeAsDouble() >= right->GetLexemeAsDouble());
+				return createTruthToken(left->GetLexemeAsDouble() >= right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::LESS:
-				return std::make_shared<double>(left->GetLexemeAsDouble() < right->GetLexemeAsDouble());
+				return createTruthToken(left->GetLexemeAsDouble() < right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::LESS_EQUAL:
-				return std::make_shared<double>(left->GetLexemeAsDouble() <= right->GetLexemeAsDouble());
+				return createTruthToken(left->GetLexemeAsDouble() <= right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::MINUS:
-				return std::make_shared<double>(left->GetLexemeAsDouble() - right->GetLexemeAsDouble());
+				return createNumberToken(left->GetLexemeAsDouble() - right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::SLASH:
-				return std::make_shared<double>(left->GetLexemeAsDouble() / right->GetLexemeAsDouble());
+				return createNumberToken(left->GetLexemeAsDouble() / right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::STAR:
-				return std::make_shared<double>(left->GetLexemeAsDouble() * right->GetLexemeAsDouble());
+				return createNumberToken(left->GetLexemeAsDouble() * right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 			case ETokenType::PLUS:
-				return std::make_shared<double>(left->GetLexemeAsDouble() + right->GetLexemeAsDouble());
+				return createNumberToken(left->GetLexemeAsDouble() + right->GetLexemeAsDouble(), expr->m_op.GetLineNum());
 		}
 	}
 
@@ -55,7 +66,7 @@ std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryE
 		&& right->GetType() == ETokenType::STRING
 		&& expr->m_op.GetType() == ETokenType::PLUS)
 	{
-		return std::make_shared<std::string>(left->GetLexemeAsString() + right->GetLexemeAsString());
+		return createStringToken(left->GetLexeme() + right->GetLexeme(), expr->m_op.GetLineNum());
 	}
 
 	// Unreachable
@@ -98,9 +109,16 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 	switch (expr->m_op.GetType())
 	{
 		case ETokenType::BANG:
-			return std::make_shared<bool>(!isTruthy(right));
+			return createTruthToken(!isTruthy(right), right->GetLineNum());
 		case ETokenType::MINUS:
-			return std::make_shared<double>(-(right->GetLexemeAsDouble()));
+			if (right->GetType() == ETokenType::NUMBER)
+			{
+				return createNumberToken(-(right->GetLexemeAsDouble()), right->GetLineNum());
+			}
+			else
+			{
+				// Throw type error
+			}
 	}
 
 	// Unreachable
@@ -128,4 +146,22 @@ bool Interpreter::isTruthy(std::shared_ptr<Token> token)
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)
 {
 	return false;
+}
+
+std::shared_ptr<Token> Interpreter::createTruthToken(bool value, int lineNum)
+{
+	ETokenType type = value ? ETokenType::TRUE : ETokenType::FALSE;
+	std::string lexeme = value ? "true" : "false";
+
+	return std::make_shared<Token>(type, lexeme, lineNum);
+}
+
+std::shared_ptr<Token> Interpreter::createNumberToken(double value, int lineNum)
+{
+	return std::make_shared<Token>(ETokenType::NUMBER, std::to_string(value), lineNum);
+}
+
+std::shared_ptr<Token> Interpreter::createStringToken(std::string value, int lineNum)
+{
+	return std::make_shared<Token>(ETokenType::STRING, value, lineNum);
 }
