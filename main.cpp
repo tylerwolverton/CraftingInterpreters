@@ -19,17 +19,15 @@ bool run(std::string source) {
 
 	std::cout << "AST Tree:\n";
 	auto parser = Parser(tokens);
-	auto expr = parser.Parse();
-
-	if (expr == nullptr)
+	auto statements = parser.Parse();
+	
+	/*for (auto stmt : statements)
 	{
-		return false;
-	}
-
-	std::cout << AstPrinter().Print(expr);
+		std::cout << AstPrinter().Print(stmt);
+	}*/
 
 	std::cout << "\nResult: ";
-	Interpreter().Interpret(expr);
+	Interpreter().Interpret(statements);
 
 	return true;
 }

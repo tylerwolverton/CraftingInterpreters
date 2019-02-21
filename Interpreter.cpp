@@ -10,18 +10,12 @@ Interpreter::~Interpreter()
 {
 }
 
-void Interpreter::Interpret(const std::shared_ptr<Expr>& expr)
+void Interpreter::Interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 {
-	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr));
-
-	switch (value->GetType())
+	for (auto stmt : statements)
 	{
-		case ETokenType::NUMBER:
-			std::cout << value->GetLexemeAsDouble() << "\n";
-			break;
-		default:
-			std::cout << value->GetLexeme() << "\n";
-			break;
+		//std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr));
+		execute(stmt);
 	}
 }
 
@@ -125,6 +119,17 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 	return nullptr;
 }
 
+void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt)
+{
+	evaluate(stmt->m_expr);
+}
+
+void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
+{
+	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(stmt->m_expr));
+	std::cout << stringify(value) << std::endl;
+}
+
 std::shared_ptr<void> Interpreter::evaluate(std::shared_ptr<Expr> expr)
 {
 	return expr->accept(*this);
@@ -141,6 +146,11 @@ bool Interpreter::isTruthy(std::shared_ptr<Token> token)
 	}
 
 	return false;
+}
+
+void Interpreter::execute(std::shared_ptr<Stmt> stmt) 
+{
+	stmt->accept(*this);
 }
 
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)
@@ -164,4 +174,15 @@ std::shared_ptr<Token> Interpreter::createNumberToken(double value, int lineNum)
 std::shared_ptr<Token> Interpreter::createStringToken(std::string value, int lineNum)
 {
 	return std::make_shared<Token>(ETokenType::STRING, value, lineNum);
+}
+
+std::string Interpreter::stringify(std::shared_ptr<Token> value)
+{
+	switch (value->GetType())
+	{
+	case ETokenType::NUMBER:
+		return std::to_string(value->GetLexemeAsDouble());
+	default:
+		return value->GetLexeme();
+	}
 }

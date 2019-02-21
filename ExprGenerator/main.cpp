@@ -8,9 +8,10 @@
 
 void defineVisitor(std::stringstream& buffer,
 				   std::string baseName,
+				   std::string returnType,
 				   std::vector<std::string> types)
 {
-	buffer << "class Visitor { \n";
+	buffer << "class " << baseName << "Visitor { \n";
 	buffer << "public:\n";
 
 	for (auto type : types)
@@ -18,14 +19,15 @@ void defineVisitor(std::stringstream& buffer,
 		auto typeName = type.substr(0, type.find_first_of(" "));
 		auto baseNameLower = baseName;
 		std::transform(baseNameLower.begin(), baseNameLower.end(), baseNameLower.begin(), ::tolower);
-		buffer << "    virtual std::shared_ptr<void> visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ") = 0;\n";
+		buffer << "    virtual " << returnType << " visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ") = 0;\n";
 	}
 
 	buffer << "    };\n\n";
 }
 
 void defineType(std::stringstream& buffer, 
-				std::string baseName, 
+				std::string baseName,
+				std::string returnType,
 				std::string className,
 				std::string fields,
 				std::vector<std::string> fieldVec)
@@ -51,7 +53,7 @@ void defineType(std::stringstream& buffer,
 
 	buffer << "  {}\n\n";
 
-	buffer << "    std::shared_ptr<void> accept(Visitor& visitor) override {\n";
+	buffer << "    " << returnType << " accept(" << baseName << "Visitor& visitor) override {\n";
 	buffer << "        return visitor.visit" << className << "(std::make_shared<" << className << ">(*this));\n";
 	buffer << "    }\n";
 
@@ -64,7 +66,10 @@ void defineType(std::stringstream& buffer,
 	buffer << "\n  };\n\n";
 }
 
-bool defineAst(std::string outputDir, std::string baseName, std::vector<std::string> types)
+bool defineAst(std::string outputDir, 
+			   std::string baseName, 
+			   std::string returnType,
+	           std::vector<std::string> types)
 {
 	std::string path = outputDir + "/" + baseName + ".h";
 	std::ofstream outFile(path);
@@ -88,12 +93,12 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 
 	buffer << "\n";
 
-	defineVisitor(buffer, baseName, types);
+	defineVisitor(buffer, baseName, returnType, types);
 
 	// Define base class
 	buffer << "class " << baseName << " {\n";
 	buffer << "    public:\n";
-	buffer << "    virtual std::shared_ptr<void> accept(Visitor& visitor) {}\n";
+	buffer << "    virtual " << returnType << " accept(" << baseName << "Visitor& visitor) = 0;\n";
 	buffer << "};\n\n";
 
 	// Define each subclass
@@ -109,7 +114,7 @@ bool defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 			fieldVec.push_back(fieldStr.substr(fieldStr.find_first_not_of(" "), fieldStr.find_last_not_of(" ") + 1));
 		}
 
-		defineType(buffer, baseName, className, fields, fieldVec);
+		defineType(buffer, baseName, returnType, className, fields, fieldVec);
 	}
 
 	outFile.write((buffer.str()).c_str(), strlen((buffer.str()).c_str()));
@@ -126,14 +131,23 @@ int main(int argc, char *argv[])
 	}
 
 	std::string outputDir = argv[1];
-	if (defineAst(outputDir, "Expr", std::vector<std::string>{
+	if (defineAst(outputDir, "Expr", "std::shared_ptr<void>", std::vector<std::string>{
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
 		"UnaryExpr    : Token op, std::shared_ptr<Expr> right"
 	}) == false)
 	{
-		std::cout << "Generation failed\n";
+		std::cout << "Expr generation failed\n";
+		exit(64);
+	}
+
+	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
+		"ExpressionStmt : std::shared_ptr<Expr> expr",
+		"PrintStmt      : std::shared_ptr<Expr> expr"
+	}) == false)
+	{
+		std::cout << "Stmt generation failed\n";
 		exit(64);
 	}
 }

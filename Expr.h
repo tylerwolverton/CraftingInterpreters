@@ -7,7 +7,7 @@ class GroupingExpr;
 class LiteralExpr;
 class UnaryExpr;
 
-class Visitor { 
+class ExprVisitor { 
 public:
     virtual std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) = 0;
@@ -17,7 +17,7 @@ public:
 
 class Expr {
     public:
-		virtual std::shared_ptr<void> accept(Visitor& visitor) = 0;
+    virtual std::shared_ptr<void> accept(ExprVisitor& visitor) = 0;
 };
 
   class BinaryExpr : public Expr {
@@ -28,7 +28,7 @@ class Expr {
       m_right(right)
         {}
 
-    std::shared_ptr<void> accept(Visitor& visitor) override {
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
         return visitor.visitBinaryExpr(std::make_shared<BinaryExpr>(*this));
     }
       std::shared_ptr<Expr> m_left;
@@ -43,7 +43,7 @@ class Expr {
       : m_expr(expr)
         {}
 
-    std::shared_ptr<void> accept(Visitor& visitor) override {
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
         return visitor.visitGroupingExpr(std::make_shared<GroupingExpr>(*this));
     }
       std::shared_ptr<Expr> m_expr;
@@ -56,7 +56,7 @@ class Expr {
       : m_literal(literal)
         {}
 
-    std::shared_ptr<void> accept(Visitor& visitor) override {
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
         return visitor.visitLiteralExpr(std::make_shared<LiteralExpr>(*this));
     }
       Token m_literal;
@@ -70,7 +70,7 @@ class Expr {
       m_right(right)
         {}
 
-    std::shared_ptr<void> accept(Visitor& visitor) override {
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
         return visitor.visitUnaryExpr(std::make_shared<UnaryExpr>(*this));
     }
       Token m_op;

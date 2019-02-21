@@ -1,6 +1,7 @@
 #pragma once
 #include "Types.h"
 #include "Expr.h"
+#include "Stmt.h"
 #include <vector>
 #include <memory>
 
@@ -11,7 +12,7 @@ public:
 	Parser(const std::shared_ptr<std::vector<Token>>& tokens);
 	~Parser();
 
-	std::shared_ptr<Expr> Parse();
+	std::vector<std::shared_ptr<Stmt>> Parse();
 
 private:
 	std::shared_ptr<std::vector<Token>> m_tokens;
@@ -33,5 +34,9 @@ private:
 	Token consume(const ETokenType& type, const std::string& msg);
 	void synchronize();
 	bool isAtEnd();
+
+	std::shared_ptr<Stmt> statement();
+	std::shared_ptr<Stmt> printStatement();
+	std::shared_ptr<Stmt> expressionStatement();
 };
 

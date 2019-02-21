@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-class AstPrinter : public Visitor
+class AstPrinter : public ExprVisitor
 {
 public:
 	AstPrinter();
