@@ -15,6 +15,7 @@ public:
 	std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) override;
 	std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) override;
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
+	std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) override;
 
 private:
 	std::shared_ptr<void> parenthesize(std::string name, std::vector<std::shared_ptr<Expr>> exprs);

@@ -22,7 +22,7 @@ void defineVisitor(std::stringstream& buffer,
 		buffer << "    virtual " << returnType << " visit" << typeName << "(const std::shared_ptr<" << typeName << ">& " << baseNameLower << ") = 0;\n";
 	}
 
-	buffer << "    };\n\n";
+	buffer << "};\n\n";
 }
 
 void defineType(std::stringstream& buffer, 
@@ -32,7 +32,7 @@ void defineType(std::stringstream& buffer,
 				std::string fields,
 				std::vector<std::string> fieldVec)
 {
-	buffer << "  class " << className << " : public " << baseName << " {\n";
+	buffer << "class " << className << " : public " << baseName << " {\n";
 	buffer << "    public:\n";
 	
 	// Constructor
@@ -55,15 +55,15 @@ void defineType(std::stringstream& buffer,
 
 	buffer << "    " << returnType << " accept(" << baseName << "Visitor& visitor) override {\n";
 	buffer << "        return visitor.visit" << className << "(std::make_shared<" << className << ">(*this));\n";
-	buffer << "    }\n";
+	buffer << "    }\n\n";
 
 	// Local variables
 	for (auto field : fieldVec)
 	{
-		buffer << "      " << field.substr(0, field.find_first_of(" ")) << " m_" << field.substr(field.find_first_of(" ") + 1) << ";\n";
+		buffer << "    " << field.substr(0, field.find_first_of(" ")) << " m_" << field.substr(field.find_first_of(" ") + 1) << ";\n";
 	}
 
-	buffer << "\n  };\n\n";
+	buffer << "};\n\n";
 }
 
 bool defineAst(std::string outputDir, 
@@ -83,6 +83,9 @@ bool defineAst(std::string outputDir,
 	buffer << "#pragma once\n";
 	buffer << "#include \"Types.h\"\n";
 	buffer << "#include <memory>\n\n";
+
+	buffer << "// This file was generated from ExprGenerator.exe. \n";
+	buffer << "// If changes are needed, modify ExprGenerator/main.cpp \n\n";
 
 	// Forward declarations fro expr types
 	for (const auto& type : types)
@@ -135,7 +138,8 @@ int main(int argc, char *argv[])
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
-		"UnaryExpr    : Token op, std::shared_ptr<Expr> right"
+		"UnaryExpr    : Token op, std::shared_ptr<Expr> right",
+		"VariableExpr : Token name"
 	}) == false)
 	{
 		std::cout << "Expr generation failed\n";
@@ -144,7 +148,8 @@ int main(int argc, char *argv[])
 
 	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
-		"PrintStmt      : std::shared_ptr<Expr> expr"
+		"PrintStmt      : std::shared_ptr<Expr> expr",
+		"VarStmt        : Token name, std::shared_ptr<Expr> initializer"
 	}) == false)
 	{
 		std::cout << "Stmt generation failed\n";

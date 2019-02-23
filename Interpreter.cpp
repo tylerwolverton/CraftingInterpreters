@@ -4,6 +4,7 @@
 
 Interpreter::Interpreter()
 {
+	//m_environment = Environment();
 }
 
 Interpreter::~Interpreter()
@@ -75,25 +76,6 @@ std::shared_ptr<void> Interpreter::visitGroupingExpr(const std::shared_ptr<Group
 std::shared_ptr<void> Interpreter::visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr)
 {
 	return std::make_shared<Token>(expr->m_literal);
-	//ETokenType type = expr->m_literal.GetType();
-	//if (type == ETokenType::STRING)
-	//{
-	//	return std::make_shared<std::string>(expr->m_literal.GetLexeme());
-	//}
-	//else if (type == ETokenType::NUMBER)
-	//{
-	//	return std::make_shared<double>(atof(expr->m_literal.GetLexeme().c_str()));
-	//}
-	//else if (type == ETokenType::TRUE)
-	//{
-	//	return std::make_shared<bool>(true);
-	//}
-	//else if (type == ETokenType::FALSE)
-	//{
-	//	return std::make_shared<bool>(false);
-	//}
-	//
-	//return nullptr;
 }
 
 std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr)
@@ -119,6 +101,11 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 	return nullptr;
 }
 
+std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
+{
+	return m_environment.Get(expr->m_name);
+}
+
 void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt)
 {
 	evaluate(stmt->m_expr);
@@ -128,6 +115,17 @@ void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(stmt->m_expr));
 	std::cout << stringify(value) << std::endl;
+}
+
+void Interpreter::visitVarStmt(const std::shared_ptr<VarStmt>& stmt)
+{
+	std::shared_ptr<Token> value = nullptr;
+	if (stmt->m_initializer != nullptr)
+	{
+		value = std::static_pointer_cast<Token>(evaluate(stmt->m_initializer));
+	}
+
+	m_environment.Define(stmt->m_name.GetLexeme(), value);
 }
 
 std::shared_ptr<void> Interpreter::evaluate(std::shared_ptr<Expr> expr)

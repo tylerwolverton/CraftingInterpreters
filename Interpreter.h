@@ -1,7 +1,9 @@
 #pragma once
 #include "Expr.h"
 #include "Stmt.h"
+#include "Environment.h"
 #include <vector>
+
 class Interpreter : public ExprVisitor, public StmtVisitor
 {
 public:
@@ -14,10 +16,15 @@ public:
 	std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) override;
 	std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) override;
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
+	std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) override;
+
 	void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) override;
 	void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) override;
+	void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) override;
 
 private:
+	Environment m_environment;
+
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
 	void execute(std::shared_ptr<Stmt> stmt);
 	bool isTruthy(std::shared_ptr<Token> token);

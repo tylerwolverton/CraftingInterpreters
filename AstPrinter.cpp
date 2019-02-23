@@ -40,6 +40,16 @@ std::shared_ptr<void> AstPrinter::visitUnaryExpr(const std::shared_ptr<UnaryExpr
 	return parenthesize(expr->m_op.GetLexeme(), std::vector<std::shared_ptr<Expr>>{expr->m_right});
 }
 
+std::shared_ptr<void> AstPrinter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
+{
+	if (expr != nullptr)
+	{
+		return std::make_shared<std::string>(expr->m_name.GetLexeme());
+	}
+
+	return nullptr;
+}
+
 std::shared_ptr<void> AstPrinter::parenthesize(std::string name, std::vector<std::shared_ptr<Expr>> exprs)
 {
 	std::stringstream buffer;

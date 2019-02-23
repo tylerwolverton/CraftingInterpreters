@@ -32,10 +32,19 @@ private:
 	}
 };
 
-class ParserError : std::nested_exception
+class ParseError : std::nested_exception
 {
 public:
-	ParserError(Token token, std::string msg)
+	ParseError(Token token, std::string msg)
+	{
+		Error::DisplayError(token, msg);
+	}
+};
+
+class RuntimeError : std::nested_exception
+{
+public:
+	RuntimeError(Token token, std::string msg)
 	{
 		Error::DisplayError(token, msg);
 	}
