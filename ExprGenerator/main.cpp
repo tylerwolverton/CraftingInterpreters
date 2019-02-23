@@ -83,6 +83,7 @@ bool defineAst(std::string outputDir,
 	buffer << "#pragma once\n";
 	buffer << "#include \"Types.h\"\n";
 	buffer << "#include <memory>\n\n";
+	buffer << "#include <vector>\n";
 
 	buffer << "// This file was generated from ExprGenerator.exe. \n";
 	buffer << "// If changes are needed, modify ExprGenerator/main.cpp \n\n";
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
 
 	std::string outputDir = argv[1];
 	if (defineAst(outputDir, "Expr", "std::shared_ptr<void>", std::vector<std::string>{
+		"AssignExpr   : Token name, std::shared_ptr<Expr> value",
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
@@ -147,6 +149,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
+		"BlockStmt      : std::vector<std::shared_ptr<Stmt>> statements",
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
 		"PrintStmt      : std::shared_ptr<Expr> expr",
 		"VarStmt        : Token name, std::shared_ptr<Expr> initializer"

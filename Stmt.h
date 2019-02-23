@@ -2,15 +2,18 @@
 #include "Types.h"
 #include <memory>
 
+#include <vector>
 // This file was generated from ExprGenerator.exe. 
 // If changes are needed, modify ExprGenerator/main.cpp 
 
+class BlockStmt;
 class ExpressionStmt;
 class PrintStmt;
 class VarStmt;
 
 class StmtVisitor { 
 public:
+    virtual void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) = 0;
     virtual void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) = 0;
     virtual void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) = 0;
     virtual void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) = 0;
@@ -19,6 +22,19 @@ public:
 class Stmt {
     public:
     virtual void accept(StmtVisitor& visitor) = 0;
+};
+
+class BlockStmt : public Stmt {
+    public:
+    BlockStmt( std::vector<std::shared_ptr<Stmt>> statements ) 
+      : m_statements(statements)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitBlockStmt(std::make_shared<BlockStmt>(*this));
+    }
+
+    std::vector<std::shared_ptr<Stmt>> m_statements;
 };
 
 class ExpressionStmt : public Stmt {

@@ -2,9 +2,11 @@
 #include "Types.h"
 #include <memory>
 
+#include <vector>
 // This file was generated from ExprGenerator.exe. 
 // If changes are needed, modify ExprGenerator/main.cpp 
 
+class AssignExpr;
 class BinaryExpr;
 class GroupingExpr;
 class LiteralExpr;
@@ -13,6 +15,7 @@ class VariableExpr;
 
 class ExprVisitor { 
 public:
+    virtual std::shared_ptr<void> visitAssignExpr(const std::shared_ptr<AssignExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) = 0;
@@ -23,6 +26,21 @@ public:
 class Expr {
     public:
     virtual std::shared_ptr<void> accept(ExprVisitor& visitor) = 0;
+};
+
+class AssignExpr : public Expr {
+    public:
+    AssignExpr( Token name, std::shared_ptr<Expr> value ) 
+      : m_name(name),
+      m_value(value)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitAssignExpr(std::make_shared<AssignExpr>(*this));
+    }
+
+    Token m_name;
+    std::shared_ptr<Expr> m_value;
 };
 
 class BinaryExpr : public Expr {

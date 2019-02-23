@@ -17,7 +17,6 @@ bool run(std::string source) {
 		//std::cout << token.GetLineNum() << ": type: " << token.GetType() << " lexeme: " << token.GetLexeme() << "\n";
 	}
 
-	std::cout << "AST Tree:\n";
 	auto parser = Parser(tokens);
 	auto statements = parser.Parse();
 	
@@ -26,7 +25,7 @@ bool run(std::string source) {
 		std::cout << AstPrinter().Print(stmt);
 	}*/
 
-	std::cout << "\nResult: ";
+	std::cout << "Output:\n";
 	Interpreter().Interpret(statements);
 
 	return true;

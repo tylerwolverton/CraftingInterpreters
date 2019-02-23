@@ -21,14 +21,11 @@ std::vector<std::shared_ptr<Stmt>> Parser::Parse()
 	return statements;
 }
 
-std::shared_ptr<Expr> Parser::expression()
-{
-	return equality();
-}
 
 std::shared_ptr<Stmt> Parser::statement()
 {
-	if (match(std::vector<ETokenType>{ ETokenType::PRINT })) return printStatement();
+	if (match(std::vector<ETokenType>{ PRINT })) return printStatement();
+	if (match(std::vector<ETokenType>{ LEFT_BRACE })) return std::make_shared<BlockStmt>(block());
 
 	return expressionStatement();
 }
@@ -38,6 +35,19 @@ std::shared_ptr<Stmt> Parser::printStatement()
 	std::shared_ptr<Expr> value = expression();
 	consume(SEMICOLON, "Expected ';' after value.");
 	return std::make_shared<PrintStmt>(value);
+}
+
+std::vector<std::shared_ptr<Stmt>> Parser::block()
+{
+	std::vector<std::shared_ptr<Stmt>> statements;
+
+	while (!check(RIGHT_BRACE) && !isAtEnd()) 
+	{
+		statements.push_back(declaration());
+	}
+
+	consume(RIGHT_BRACE, "Expect '}' after block.");
+	return statements;
 }
 
 std::shared_ptr<Stmt> Parser::expressionStatement()
@@ -77,6 +87,32 @@ std::shared_ptr<Stmt> Parser::varDeclaration()
 
 	consume(SEMICOLON, "Expect ';' after variable declaration.");
 	return std::make_shared<VarStmt>(name, initializer);
+}
+
+std::shared_ptr<Expr> Parser::expression()
+{
+	return assignment();
+}
+
+std::shared_ptr<Expr> Parser::assignment() 
+{
+	std::shared_ptr<Expr> expr = equality();
+
+	if (match(std::vector<ETokenType>{ EQUAL }))
+	{
+		Token equals = previous();
+		std::shared_ptr<Expr> value = assignment();
+
+		if (std::dynamic_pointer_cast<VariableExpr>(expr) != nullptr) 
+		{
+			Token name = (std::static_pointer_cast<VariableExpr>(expr))->m_name;
+			return std::make_shared<AssignExpr>(name, value);
+		}
+
+		//error(equals, "Invalid assignment target.");
+	}
+
+	return expr;
 }
 
 std::shared_ptr<Expr> Parser::equality()

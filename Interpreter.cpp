@@ -20,6 +20,14 @@ void Interpreter::Interpret(const std::vector<std::shared_ptr<Stmt>>& statements
 	}
 }
 
+std::shared_ptr<void> Interpreter::visitAssignExpr(const std::shared_ptr<AssignExpr>& expr)
+{
+	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr->m_value));
+
+	m_environment.Assign(expr->m_name, value);
+	return value;
+}
+
 std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr)
 {
 	std::shared_ptr<Token> left = std::static_pointer_cast<Token>(evaluate(expr->m_left));
@@ -104,6 +112,31 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
 	return m_environment.Get(expr->m_name);
+}
+
+void Interpreter::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
+{
+	executeBlock(stmt->m_statements, Environment(std::make_shared<Environment>(m_environment)));
+}
+
+void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, Environment environment)
+{
+	Environment previous = m_environment;
+	try 
+	{
+		m_environment = environment;
+
+		for (const auto& statement : statements) 
+		{
+			execute(statement);
+		}
+
+		m_environment = previous;
+	}
+	catch(...)
+	{
+		m_environment = previous;
+	}
 }
 
 void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt)
