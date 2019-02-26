@@ -8,6 +8,7 @@
 
 class BlockStmt;
 class ExpressionStmt;
+class IfStmt;
 class PrintStmt;
 class VarStmt;
 
@@ -15,6 +16,7 @@ class StmtVisitor {
 public:
     virtual void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) = 0;
     virtual void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) = 0;
+    virtual void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) = 0;
     virtual void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) = 0;
     virtual void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) = 0;
 };
@@ -48,6 +50,23 @@ class ExpressionStmt : public Stmt {
     }
 
     std::shared_ptr<Expr> m_expr;
+};
+
+class IfStmt : public Stmt {
+    public:
+    IfStmt( std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch ) 
+      : m_condition(condition),
+      m_thenBranch(thenBranch),
+      m_elseBranch(elseBranch)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitIfStmt(std::make_shared<IfStmt>(*this));
+    }
+
+    std::shared_ptr<Expr> m_condition;
+    std::shared_ptr<Stmt> m_thenBranch;
+    std::shared_ptr<Stmt> m_elseBranch;
 };
 
 class PrintStmt : public Stmt {

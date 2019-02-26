@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
 	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
 		"BlockStmt      : std::vector<std::shared_ptr<Stmt>> statements",
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
+		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
 		"PrintStmt      : std::shared_ptr<Expr> expr",
 		"VarStmt        : Token name, std::shared_ptr<Expr> initializer"
 	}) == false)

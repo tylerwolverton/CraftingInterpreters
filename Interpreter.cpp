@@ -144,6 +144,18 @@ void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stm
 	evaluate(stmt->m_expr);
 }
 
+void Interpreter::visitIfStmt(const std::shared_ptr<IfStmt>& stmt)
+{
+	if (isTruthy(std::static_pointer_cast<Token>(evaluate(stmt->m_condition))))
+	{
+		execute(stmt->m_thenBranch);
+	}
+	else if (stmt->m_elseBranch != nullptr)
+	{
+		execute(stmt->m_elseBranch);
+	}
+}
+
 void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(stmt->m_expr));

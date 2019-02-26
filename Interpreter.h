@@ -19,8 +19,9 @@ public:
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
 	std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) override;
 
-	void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) override;
 	void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) override;
+	void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) override;
+	void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) override;
 	void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) override;
 	void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) override;
 

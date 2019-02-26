@@ -24,10 +24,27 @@ std::vector<std::shared_ptr<Stmt>> Parser::Parse()
 
 std::shared_ptr<Stmt> Parser::statement()
 {
+	if (match(std::vector<ETokenType>{ IF })) return ifStatement();
 	if (match(std::vector<ETokenType>{ PRINT })) return printStatement();
 	if (match(std::vector<ETokenType>{ LEFT_BRACE })) return std::make_shared<BlockStmt>(block());
 
 	return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::ifStatement()
+{
+	consume(LEFT_PAREN, "Expected '(' after 'if'.");
+	std::shared_ptr<Expr> condition = expression();
+	consume(RIGHT_PAREN, "Expected ')' after condition.");
+
+	std::shared_ptr<Stmt> thenBranch = statement();
+	std::shared_ptr<Stmt> elseBranch = nullptr;
+	if (match(std::vector<ETokenType>{ ELSE }))
+	{
+		elseBranch = statement();
+	}
+
+	return std::make_shared<IfStmt>(condition, thenBranch, elseBranch);
 }
 
 std::shared_ptr<Stmt> Parser::printStatement()
