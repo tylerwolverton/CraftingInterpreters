@@ -11,6 +11,7 @@ class ExpressionStmt;
 class IfStmt;
 class PrintStmt;
 class VarStmt;
+class WhileStmt;
 
 class StmtVisitor { 
 public:
@@ -19,6 +20,7 @@ public:
     virtual void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) = 0;
     virtual void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) = 0;
     virtual void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) = 0;
+    virtual void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) = 0;
 };
 
 class Stmt {
@@ -95,5 +97,20 @@ class VarStmt : public Stmt {
 
     Token m_name;
     std::shared_ptr<Expr> m_initializer;
+};
+
+class WhileStmt : public Stmt {
+    public:
+    WhileStmt( std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body ) 
+      : m_condition(condition),
+      m_body(body)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitWhileStmt(std::make_shared<WhileStmt>(*this));
+    }
+
+    std::shared_ptr<Expr> m_condition;
+    std::shared_ptr<Stmt> m_body;
 };
 

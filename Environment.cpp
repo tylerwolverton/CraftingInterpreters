@@ -3,7 +3,6 @@
 
 Environment::Environment()
 {
-	//m_varToTokenMap = std::map<std::string, std::shared_ptr<Token>>();
 	m_enclosingEnv = nullptr;
 }
 
@@ -26,7 +25,7 @@ void Environment::Assign(Token name, std::shared_ptr<Token> value)
 	auto mapIter = m_varToTokenMap.find(name.GetLexeme());
 	if (mapIter != m_varToTokenMap.end())
 	{
-		m_varToTokenMap.insert(std::make_pair(name.GetLexeme(), value));
+		mapIter->second = value;
 		return;
 	}
 	

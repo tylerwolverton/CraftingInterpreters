@@ -26,6 +26,8 @@ std::shared_ptr<Stmt> Parser::statement()
 {
 	if (match(std::vector<ETokenType>{ IF })) return ifStatement();
 	if (match(std::vector<ETokenType>{ PRINT })) return printStatement();
+	if (match(std::vector<ETokenType>{ WHILE })) return whileStatement();
+	if (match(std::vector<ETokenType>{ FOR })) return forStatement();
 	if (match(std::vector<ETokenType>{ LEFT_BRACE })) return std::make_shared<BlockStmt>(block());
 
 	return expressionStatement();
@@ -52,6 +54,84 @@ std::shared_ptr<Stmt> Parser::printStatement()
 	std::shared_ptr<Expr> value = expression();
 	consume(SEMICOLON, "Expected ';' after value.");
 	return std::make_shared<PrintStmt>(value);
+}
+
+std::shared_ptr<Stmt> Parser::whileStatement()
+{
+	consume(LEFT_PAREN, "Expected '(' after 'while'.");
+	std::shared_ptr<Expr> condition = expression();
+	consume(RIGHT_PAREN, "Expected ')' after condition.");
+
+	std::shared_ptr<Stmt> body = statement();
+
+	return std::make_shared<WhileStmt>(condition, body);
+}
+
+std::shared_ptr<Stmt> Parser::forStatement()
+{
+	consume(LEFT_PAREN, "Expected '(' after 'for'.");
+
+
+	// Initializer
+	std::shared_ptr<Stmt> initializer = nullptr;
+	if (match(std::vector<ETokenType>{ SEMICOLON }))
+	{
+		// No initializer, stay nullptr
+	}
+	else if (match(std::vector<ETokenType>{ VAR }))
+	{
+		initializer = varDeclaration();
+	}
+	else
+	{
+		initializer = expressionStatement();
+	}
+
+	// Condition
+	std::shared_ptr<Expr> condition = nullptr;
+	if (!check(SEMICOLON))
+	{
+		condition = expression();
+	}
+	else
+	{
+		condition = std::make_shared<LiteralExpr>(Token(TRUE, "true", 0));
+	}
+	consume(SEMICOLON, "Expected ';' after loop condition.");
+	
+	// Increment
+	std::shared_ptr<Expr> increment = nullptr;
+	if (!check(RIGHT_PAREN))
+	{
+		increment = expression();
+	}	
+	consume(RIGHT_PAREN, "Expected ')' after for clauses.");
+
+	std::shared_ptr<Stmt> body = statement();
+
+	// Build while loop from components
+	std::vector<std::shared_ptr<Stmt>> blockBody;
+	std::vector<std::shared_ptr<Stmt>> whileBody;
+
+	if (initializer != nullptr)
+	{
+		blockBody.push_back(initializer);
+	}
+
+	if (condition == nullptr)
+	{
+		condition = std::make_shared<LiteralExpr>(Token(TRUE, "true", 0));
+	}
+	whileBody.push_back(body);
+
+	if (increment != nullptr)
+	{
+		whileBody.push_back(std::make_shared<ExpressionStmt>(increment));
+	}
+
+	blockBody.push_back(std::make_shared<WhileStmt>(condition, std::make_shared<BlockStmt>(whileBody)));
+
+	return std::make_shared<BlockStmt>(blockBody);
 }
 
 std::vector<std::shared_ptr<Stmt>> Parser::block()
@@ -113,7 +193,7 @@ std::shared_ptr<Expr> Parser::expression()
 
 std::shared_ptr<Expr> Parser::assignment() 
 {
-	std::shared_ptr<Expr> expr = equality();
+	std::shared_ptr<Expr> expr = logical_or();
 
 	if (match(std::vector<ETokenType>{ EQUAL }))
 	{
@@ -126,7 +206,35 @@ std::shared_ptr<Expr> Parser::assignment()
 			return std::make_shared<AssignExpr>(name, value);
 		}
 
-		//error(equals, "Invalid assignment target.");
+		ParseError(equals, "Invalid assignment target.");
+	}
+
+	return expr;
+}
+
+std::shared_ptr<Expr> Parser::logical_or()
+{
+	std::shared_ptr<Expr> expr = logical_and();
+
+	while (match(std::vector<ETokenType>{ ETokenType::OR }))
+	{
+		Token op = previous();
+		std::shared_ptr<Expr> right = logical_and();
+		expr = std::make_shared<LogicalExpr>(expr, op, right);
+	}
+
+	return expr;
+}
+
+std::shared_ptr<Expr> Parser::logical_and()
+{
+	std::shared_ptr<Expr> expr = equality();
+
+	while (match(std::vector<ETokenType>{ ETokenType::AND }))
+	{
+		Token op = previous();
+		std::shared_ptr<Expr> right = equality();
+		expr = std::make_shared<LogicalExpr>(expr, op, right);
 	}
 
 	return expr;

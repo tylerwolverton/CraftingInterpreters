@@ -140,6 +140,7 @@ int main(int argc, char *argv[])
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
+	    "LogicalExpr  : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"UnaryExpr    : Token op, std::shared_ptr<Expr> right",
 		"VariableExpr : Token name"
 	}) == false)
@@ -153,7 +154,8 @@ int main(int argc, char *argv[])
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
 		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
 		"PrintStmt      : std::shared_ptr<Expr> expr",
-		"VarStmt        : Token name, std::shared_ptr<Expr> initializer"
+		"VarStmt        : Token name, std::shared_ptr<Expr> initializer",
+		"WhileStmt      : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body"
 	}) == false)
 	{
 		std::cout << "Stmt generation failed\n";

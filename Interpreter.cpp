@@ -4,7 +4,7 @@
 
 Interpreter::Interpreter()
 {
-	//m_environment = Environment();
+	m_environment = std::make_shared<Environment>();
 }
 
 Interpreter::~Interpreter()
@@ -24,7 +24,7 @@ std::shared_ptr<void> Interpreter::visitAssignExpr(const std::shared_ptr<AssignE
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr->m_value));
 
-	m_environment.Assign(expr->m_name, value);
+	m_environment->Assign(expr->m_name, value);
 	return value;
 }
 
@@ -86,6 +86,28 @@ std::shared_ptr<void> Interpreter::visitLiteralExpr(const std::shared_ptr<Litera
 	return std::make_shared<Token>(expr->m_literal);
 }
 
+std::shared_ptr<void> Interpreter::visitLogicalExpr(const std::shared_ptr<LogicalExpr>& expr)
+{
+	std::shared_ptr<Token> left = std::static_pointer_cast<Token>(evaluate(expr->m_left));
+	std::shared_ptr<Token> right = std::static_pointer_cast<Token>(evaluate(expr->m_right));
+
+	switch (expr->m_op.GetType())
+	{
+		case ETokenType::OR:
+			if (isTruthy(left))
+			{
+				return createTruthToken(true, left->GetLineNum());
+			}
+		case ETokenType::AND:
+			if (!isTruthy(left))
+			{
+				return createTruthToken(false, left->GetLineNum());
+			}
+	}
+
+	return std::static_pointer_cast<Token>(evaluate(expr->m_right));
+}
+
 std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr)
 {
 	std::shared_ptr<Token> right = std::static_pointer_cast<Token>(evaluate(expr->m_right));
@@ -111,17 +133,17 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
-	return m_environment.Get(expr->m_name);
+	return m_environment->Get(expr->m_name);
 }
 
 void Interpreter::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
 {
-	executeBlock(stmt->m_statements, Environment(std::make_shared<Environment>(m_environment)));
+	executeBlock(stmt->m_statements, std::make_shared<Environment>(std::make_shared<Environment>(m_environment)));
 }
 
-void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, Environment environment)
+void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment)
 {
-	Environment previous = m_environment;
+	std::shared_ptr<Environment> previous = m_environment;
 	try 
 	{
 		m_environment = environment;
@@ -170,7 +192,15 @@ void Interpreter::visitVarStmt(const std::shared_ptr<VarStmt>& stmt)
 		value = std::static_pointer_cast<Token>(evaluate(stmt->m_initializer));
 	}
 
-	m_environment.Define(stmt->m_name.GetLexeme(), value);
+	m_environment->Define(stmt->m_name.GetLexeme(), value);
+}
+
+void Interpreter::visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt)
+{
+	while (isTruthy(std::static_pointer_cast<Token>(evaluate(stmt->m_condition))))
+	{
+		execute(stmt->m_body);
+	}
 }
 
 std::shared_ptr<void> Interpreter::evaluate(std::shared_ptr<Expr> expr)
@@ -198,7 +228,8 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt)
 
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)
 {
-	return false;
+	// TODO: Account for type differences
+	return (left->GetLexeme() == right->GetLexeme());
 }
 
 std::shared_ptr<Token> Interpreter::createTruthToken(bool value, int lineNum)
