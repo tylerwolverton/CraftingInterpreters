@@ -8,6 +8,7 @@
 
 class AssignExpr;
 class BinaryExpr;
+class CallExpr;
 class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
@@ -18,6 +19,7 @@ class ExprVisitor {
 public:
     virtual std::shared_ptr<void> visitAssignExpr(const std::shared_ptr<AssignExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) = 0;
+    virtual std::shared_ptr<void> visitCallExpr(const std::shared_ptr<CallExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLogicalExpr(const std::shared_ptr<LogicalExpr>& expr) = 0;
@@ -60,6 +62,23 @@ class BinaryExpr : public Expr {
     std::shared_ptr<Expr> m_left;
     Token m_op;
     std::shared_ptr<Expr> m_right;
+};
+
+class CallExpr : public Expr {
+    public:
+    CallExpr( std::shared_ptr<Expr> callee, Token paren, std::vector<std::shared_ptr<Expr>> arguments ) 
+      : m_callee(callee),
+      m_paren(paren),
+      m_arguments(arguments)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitCallExpr(std::make_shared<CallExpr>(*this));
+    }
+
+    std::shared_ptr<Expr> m_callee;
+    Token m_paren;
+    std::vector<std::shared_ptr<Expr>> m_arguments;
 };
 
 class GroupingExpr : public Expr {

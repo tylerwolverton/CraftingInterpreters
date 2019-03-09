@@ -131,6 +131,19 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 	return nullptr;
 }
 
+std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>& expr)
+{
+	std::shared_ptr<Token> callee = std::static_pointer_cast<Token>(evaluate(expr->m_callee));
+
+	std::vector<std::shared_ptr<Token>> args;
+	for (const auto& arg : expr->m_arguments)
+	{
+		args.push_back(std::static_pointer_cast<Token>(evaluate(arg)));
+	}
+
+	//LoxCallable function = 
+}
+
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
 	return m_environment->Get(expr->m_name);

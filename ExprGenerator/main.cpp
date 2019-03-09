@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
 	if (defineAst(outputDir, "Expr", "std::shared_ptr<void>", std::vector<std::string>{
 		"AssignExpr   : Token name, std::shared_ptr<Expr> value",
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
+		"CallExpr     : std::shared_ptr<Expr> callee, Token paren, std::vector<std::shared_ptr<Expr>> arguments",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
 	    "LogicalExpr  : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",

@@ -18,6 +18,7 @@ public:
 	std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) override;
 	std::shared_ptr<void> visitLogicalExpr(const std::shared_ptr<LogicalExpr>& expr) override;
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
+	std::shared_ptr<void> visitCallExpr(const std::shared_ptr<CallExpr>& expr) override;
 	std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) override;
 
 	void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) override;

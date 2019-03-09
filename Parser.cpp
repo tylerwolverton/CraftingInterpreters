@@ -305,7 +305,26 @@ std::shared_ptr<Expr> Parser::unary()
 		return std::make_shared<UnaryExpr>(token, right);
 	}
 
-	return primary();
+	return call();
+}
+
+std::shared_ptr<Expr> Parser::call()
+{
+	std::shared_ptr<Expr> expr = primary();
+	
+	while (true)
+	{
+		if (match(std::vector<ETokenType> { LEFT_PAREN }))
+		{
+			expr = finishCall(expr);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return expr;
 }
 
 std::shared_ptr<Expr> Parser::primary()
@@ -320,14 +339,37 @@ std::shared_ptr<Expr> Parser::primary()
 		return std::make_shared<VariableExpr>(previous());
 	}
 
-	if (match(std::vector<ETokenType>{ ETokenType::LEFT_PAREN }))
+	if (match(std::vector<ETokenType>{ LEFT_PAREN }))
 	{
 		std::shared_ptr<Expr> expr = expression();
-		consume(ETokenType::RIGHT_PAREN, "Expected ')' after expression.");
+		consume(RIGHT_PAREN, "Expected ')' after expression.");
 		return std::make_shared<GroupingExpr>(expr);
 	}
 
 	throw ParseError(peek(), "Expected expression.");
+}
+
+
+std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee)
+{
+	std::vector<std::shared_ptr<Expr>> arguments;
+	if (!check(RIGHT_PAREN)) 
+	{
+		do 
+		{
+			if (arguments.size() >= 8) 
+			{
+				// TODO: Don't throw this, just report
+				throw ParseError(peek(), "Cannot have more than 8 arguments.");
+			}
+			arguments.push_back(expression());
+		} 
+		while (match(std::vector<ETokenType>{ COMMA }));
+	}
+
+	Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+	return std::make_shared<CallExpr>(callee, paren, arguments);
 }
 
 bool Parser::match(std::vector<ETokenType> types)
