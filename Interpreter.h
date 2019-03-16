@@ -29,6 +29,7 @@ public:
 	void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) override;
 
 private:
+	std::shared_ptr<Environment> m_globalEnv;
 	std::shared_ptr<Environment> m_environment;
 
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);

@@ -1,10 +1,14 @@
 #include "Interpreter.h"
+#include "Error.h"
+#include "LoxCallable.h"
 
 #include <iostream>
 
 Interpreter::Interpreter()
 {
-	m_environment = std::make_shared<Environment>();
+	m_globalEnv = m_environment = std::make_shared<Environment>();
+
+	m_globalEnv->Define("clock", std::make_shared<Token>(CLASS, LoxTime(), 0));
 }
 
 Interpreter::~Interpreter()
@@ -135,13 +139,27 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 {
 	std::shared_ptr<Token> callee = std::static_pointer_cast<Token>(evaluate(expr->m_callee));
 
+	if (!(callee->GetType() == FUN || callee->GetType() == CLASS))
+	{
+		throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
+	}
+
 	std::vector<std::shared_ptr<Token>> args;
 	for (const auto& arg : expr->m_arguments)
 	{
 		args.push_back(std::static_pointer_cast<Token>(evaluate(arg)));
 	}
 
-	//LoxCallable function = 
+	std::shared_ptr<LoxCallable> function = std::static_pointer_cast<LoxCallable>(callee);
+
+	if (args.size() != function->GetArity()) 
+	{
+		throw RuntimeError(expr->m_paren, "Expected " +
+			function->GetArity() + " arguments but got " +
+			args.size() + ".");
+	}
+
+	return function->Call(*this, args);
 }
 
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
