@@ -8,7 +8,7 @@ Interpreter::Interpreter()
 {
 	m_globalEnv = m_environment = std::make_shared<Environment>();
 
-	m_globalEnv->Define("clock", std::make_shared<Token>(CLASS, LoxTime(), 0));
+//	m_globalEnv->Define("clock", std::make_shared<Token>(CLASS, LoxTime(), 0));
 }
 
 Interpreter::~Interpreter()
@@ -144,22 +144,33 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 		throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
 	}
 
+	/*auto function = m_environment->Get(*callee);
+	if (function == nullptr)
+	{
+		throw RuntimeError(expr->m_paren, "Function doesn't exist" + callee->GetLexeme());
+	}*/
+
 	std::vector<std::shared_ptr<Token>> args;
 	for (const auto& arg : expr->m_arguments)
 	{
-		args.push_back(std::static_pointer_cast<Token>(evaluate(arg)));
+		std::shared_ptr<Token> evalArg = std::static_pointer_cast<Token>(evaluate(arg));
+		args.push_back(evalArg);
+		//m_environment->Define(evalArg->GetLexeme(), evalArg);
 	}
 
-	std::shared_ptr<LoxCallable> function = std::static_pointer_cast<LoxCallable>(callee);
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// TODO: Make environment take pointers to void instead of token so a LoxCallable can be saved instead of token
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if (args.size() != function->GetArity()) 
-	{
-		throw RuntimeError(expr->m_paren, "Expected " +
-			function->GetArity() + " arguments but got " +
-			args.size() + ".");
-	}
+	//std::shared_ptr<LoxCallable> function = std::static_pointer_cast<LoxCallable>(callee);
 
-	return function->Call(*this, args);
+	//if (args.size() != function->GetArity()) 
+	//{
+	//	throw RuntimeError(expr->m_paren, "Expected " + function->GetArity());// +" arguments but got " + args.size() + ".");
+	//}
+
+	//return function->Call(std::make_shared<Interpreter>(this), args);
+	return nullptr;
 }
 
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
@@ -207,6 +218,13 @@ void Interpreter::visitIfStmt(const std::shared_ptr<IfStmt>& stmt)
 	{
 		execute(stmt->m_elseBranch);
 	}
+}
+
+
+void Interpreter::visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt)
+{
+	/*LoxFunction function = new LoxFunction(stmt);
+	m_environment->Define(stmt.name.lexeme, function);*/
 }
 
 void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)

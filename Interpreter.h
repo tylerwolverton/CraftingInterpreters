@@ -24,9 +24,14 @@ public:
 	void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) override;
 	void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) override;
 	void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) override;
+	void visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt) override;
 	void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) override;
 	void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) override;
 	void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) override;
+
+	void executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment);
+
+	std::shared_ptr<Environment> GetGlobalEnv() { return m_globalEnv; }
 
 private:
 	std::shared_ptr<Environment> m_globalEnv;
@@ -34,7 +39,6 @@ private:
 
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
 	void execute(std::shared_ptr<Stmt> stmt);
-	void executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment);
 	bool isTruthy(std::shared_ptr<Token> token);
 	bool isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right);
 

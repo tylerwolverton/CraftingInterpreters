@@ -9,15 +9,18 @@
 class BlockStmt;
 class ExpressionStmt;
 class IfStmt;
+class FunctionStmt;
 class PrintStmt;
 class VarStmt;
 class WhileStmt;
+class Expr;
 
 class StmtVisitor { 
 public:
     virtual void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) = 0;
     virtual void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) = 0;
     virtual void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) = 0;
+    virtual void visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt) = 0;
     virtual void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) = 0;
     virtual void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) = 0;
     virtual void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) = 0;
@@ -69,6 +72,23 @@ class IfStmt : public Stmt {
     std::shared_ptr<Expr> m_condition;
     std::shared_ptr<Stmt> m_thenBranch;
     std::shared_ptr<Stmt> m_elseBranch;
+};
+
+class FunctionStmt : public Stmt {
+    public:
+    FunctionStmt( Token name, std::vector<std::shared_ptr<Token>> params, std::shared_ptr<BlockStmt> body ) 
+      : m_name(name),
+      m_params(params),
+      m_body(body)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitFunctionStmt(std::make_shared<FunctionStmt>(*this));
+    }
+
+    Token m_name;
+    std::vector<std::shared_ptr<Token>> m_params;
+    std::shared_ptr<BlockStmt> m_body;
 };
 
 class PrintStmt : public Stmt {

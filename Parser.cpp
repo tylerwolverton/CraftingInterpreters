@@ -158,6 +158,10 @@ std::shared_ptr<Stmt> Parser::declaration()
 {
 	try 
 	{
+		if (match(std::vector<ETokenType>{ FUN }))
+		{
+			return function("function");
+		}
 		if (match(std::vector<ETokenType>{ VAR }))
 		{
 			return varDeclaration();
@@ -170,6 +174,28 @@ std::shared_ptr<Stmt> Parser::declaration()
 		synchronize();
 		return nullptr;
 	}
+}
+
+std::shared_ptr<Stmt> Parser::function(std::string kind)
+{
+	Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+	consume(LEFT_PAREN, "Expect '(' after " + kind + " variable declaration.");
+	
+	std::vector<std::shared_ptr<Token>> parameters;
+	if (!check(RIGHT_PAREN)) {
+		do {
+			if (parameters.size() >= 8) {
+				ParseError(peek(), "Cannot have more than 8 parameters.");
+			}
+
+			parameters.push_back(std::make_shared<Token>(consume(IDENTIFIER, "Expect parameter name.")));
+		} while (match(std::vector<ETokenType>{ COMMA }));
+	}
+
+	consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+	consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+	return std::make_shared<FunctionStmt>(name, parameters, std::make_shared<BlockStmt>(block()));
 }
 
 std::shared_ptr<Stmt> Parser::varDeclaration() 
@@ -348,7 +374,6 @@ std::shared_ptr<Expr> Parser::primary()
 
 	throw ParseError(peek(), "Expected expression.");
 }
-
 
 std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee)
 {

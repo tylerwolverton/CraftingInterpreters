@@ -88,11 +88,16 @@ bool defineAst(std::string outputDir,
 	buffer << "// This file was generated from ExprGenerator.exe. \n";
 	buffer << "// If changes are needed, modify ExprGenerator/main.cpp \n\n";
 
-	// Forward declarations fro expr types
+	// Forward declarations for expr types
 	for (const auto& type : types)
 	{
 		std::string className = type.substr(0, type.find_first_of(" "));
 		buffer << "class " << className << ";\n";
+	}
+
+	if (baseName == "Stmt")
+	{
+		buffer << "class Expr;\n";
 	}
 
 	buffer << "\n";
@@ -154,6 +159,7 @@ int main(int argc, char *argv[])
 		"BlockStmt      : std::vector<std::shared_ptr<Stmt>> statements",
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
 		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
+		"FunctionStmt   : Token name, std::vector<std::shared_ptr<Token>> params, std::shared_ptr<BlockStmt> body",
 		"PrintStmt      : std::shared_ptr<Expr> expr",
 		"VarStmt        : Token name, std::shared_ptr<Expr> initializer",
 		"WhileStmt      : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body"
