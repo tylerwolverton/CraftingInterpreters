@@ -10,3 +10,6 @@
 .vs/lox-interpreter/v14/.suo
 *.tss
 .vs/lox-interpreter/v14/.suo
+*.ipch
+*.db-shm
+*.db-wal
