@@ -10,12 +10,12 @@ public:
 	Environment(const std::shared_ptr<Environment>& env);
 	~Environment();
 
-	void Define(std::string name, std::shared_ptr<Token> value);
-	void Assign(Token name, std::shared_ptr<Token> value);
-	std::shared_ptr<Token> Get(Token name);
+	void Define(std::string name, std::shared_ptr<void> value);
+	void Assign(Token name, std::shared_ptr<void> value);
+	std::shared_ptr<void> Get(Token name);
 
 private:
-	std::map<std::string, std::shared_ptr<Token>> m_varToTokenMap;
+	std::map<std::string, std::shared_ptr<void>> m_varToTokenMap;
 	std::shared_ptr<Environment> m_enclosingEnv;
 };
 

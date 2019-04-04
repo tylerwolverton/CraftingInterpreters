@@ -15,12 +15,12 @@ Environment::~Environment()
 	m_varToTokenMap.clear();
 }
 
-void Environment::Define(std::string name, std::shared_ptr<Token> value)
+void Environment::Define(std::string name, std::shared_ptr<void> value)
 {
 	m_varToTokenMap.insert(std::make_pair(name, value));
 }
 
-void Environment::Assign(Token name, std::shared_ptr<Token> value)
+void Environment::Assign(Token name, std::shared_ptr<void> value)
 {
 	auto mapIter = m_varToTokenMap.find(name.GetLexeme());
 	if (mapIter != m_varToTokenMap.end())
@@ -38,7 +38,7 @@ void Environment::Assign(Token name, std::shared_ptr<Token> value)
 	throw RuntimeError(name, "Undefined variable '" + name.GetLexeme() + "'.");
 }
 
-std::shared_ptr<Token> Environment::Get(Token name)
+std::shared_ptr<void> Environment::Get(Token name)
 {
 	auto mapIter = m_varToTokenMap.find(name.GetLexeme());
 	if (mapIter != m_varToTokenMap.end())

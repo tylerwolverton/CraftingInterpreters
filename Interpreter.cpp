@@ -1,6 +1,7 @@
 #include "Interpreter.h"
 #include "Error.h"
 #include "LoxCallable.h"
+#include "LoxFunction.h"
 
 #include <iostream>
 
@@ -137,40 +138,27 @@ std::shared_ptr<void> Interpreter::visitUnaryExpr(const std::shared_ptr<UnaryExp
 
 std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>& expr)
 {
-	std::shared_ptr<Token> callee = std::static_pointer_cast<Token>(evaluate(expr->m_callee));
+	std::shared_ptr<LoxCallable> function = std::static_pointer_cast<LoxCallable>(evaluate(expr->m_callee));
 
-	if (!(callee->GetType() == FUN || callee->GetType() == CLASS))
-	{
-		throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
-	}
-
-	/*auto function = m_environment->Get(*callee);
-	if (function == nullptr)
-	{
-		throw RuntimeError(expr->m_paren, "Function doesn't exist" + callee->GetLexeme());
-	}*/
-
+	//if (!(callee->GetType() == FUN || callee->GetType() == CLASS))
+	//{
+	//	//std::cout << expr->m_callee << std::endl;
+	//	//throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
+	//}
+	
 	std::vector<std::shared_ptr<Token>> args;
 	for (const auto& arg : expr->m_arguments)
 	{
 		std::shared_ptr<Token> evalArg = std::static_pointer_cast<Token>(evaluate(arg));
 		args.push_back(evalArg);
-		//m_environment->Define(evalArg->GetLexeme(), evalArg);
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// TODO: Make environment take pointers to void instead of token so a LoxCallable can be saved instead of token
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if (args.size() != function->GetArity()) 
+	{
+		throw RuntimeError(expr->m_paren, "Expected " + function->GetArity());// +" arguments but got " + args.size() + ".");
+	}
 
-	//std::shared_ptr<LoxCallable> function = std::static_pointer_cast<LoxCallable>(callee);
-
-	//if (args.size() != function->GetArity()) 
-	//{
-	//	throw RuntimeError(expr->m_paren, "Expected " + function->GetArity());// +" arguments but got " + args.size() + ".");
-	//}
-
-	//return function->Call(std::make_shared<Interpreter>(this), args);
-	return nullptr;
+	return function->Call(std::make_shared<Interpreter>(*this), args);
 }
 
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
@@ -220,11 +208,10 @@ void Interpreter::visitIfStmt(const std::shared_ptr<IfStmt>& stmt)
 	}
 }
 
-
 void Interpreter::visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt)
 {
-	/*LoxFunction function = new LoxFunction(stmt);
-	m_environment->Define(stmt.name.lexeme, function);*/
+	std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt);
+	m_environment->Define(stmt->m_name.GetLexeme(), function);
 }
 
 void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
