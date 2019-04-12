@@ -161,6 +161,7 @@ int main(int argc, char *argv[])
 		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
 		"FunctionStmt   : Token name, std::vector<std::shared_ptr<Token>> params, std::shared_ptr<BlockStmt> body",
 		"PrintStmt      : std::shared_ptr<Expr> expr",
+		"ReturnStmt     : Token keyword, std::shared_ptr<Expr> value",
 		"VarStmt        : Token name, std::shared_ptr<Expr> initializer",
 		"WhileStmt      : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body"
 	}) == false)

@@ -49,3 +49,16 @@ public:
 		Error::DisplayError(token, msg);
 	}
 };
+
+class ReturnException : std::nested_exception
+{
+public:
+	ReturnException(const std::shared_ptr<Token>& token)
+		: m_value(token)
+	{}
+
+	const std::shared_ptr<Token> GetValue() const { return m_value; }
+
+private:
+	std::shared_ptr<Token> m_value;
+};

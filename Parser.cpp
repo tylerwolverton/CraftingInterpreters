@@ -26,6 +26,7 @@ std::shared_ptr<Stmt> Parser::statement()
 {
 	if (match(std::vector<ETokenType>{ IF })) return ifStatement();
 	if (match(std::vector<ETokenType>{ PRINT })) return printStatement();
+	if (match(std::vector<ETokenType>{ RETURN })) return returnStatement();
 	if (match(std::vector<ETokenType>{ WHILE })) return whileStatement();
 	if (match(std::vector<ETokenType>{ FOR })) return forStatement();
 	if (match(std::vector<ETokenType>{ LEFT_BRACE })) return std::make_shared<BlockStmt>(block());
@@ -54,6 +55,19 @@ std::shared_ptr<Stmt> Parser::printStatement()
 	std::shared_ptr<Expr> value = expression();
 	consume(SEMICOLON, "Expected ';' after value.");
 	return std::make_shared<PrintStmt>(value);
+}
+
+std::shared_ptr<Stmt> Parser::returnStatement()
+{
+	Token keyword = previous();
+	std::shared_ptr<Expr> value = nullptr;
+	if (!check(SEMICOLON))
+	{
+		value = expression();
+	}
+
+	consume(SEMICOLON, "Expect ';' after return value.");
+	return std::make_shared<ReturnStmt>(keyword, value);
 }
 
 std::shared_ptr<Stmt> Parser::whileStatement()

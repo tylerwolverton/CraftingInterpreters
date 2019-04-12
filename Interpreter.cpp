@@ -185,6 +185,11 @@ void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, st
 
 		m_environment = previous;
 	}
+	catch (ReturnException retEx)
+	{
+		m_environment = previous;
+		throw(retEx);
+	}
 	catch(...)
 	{
 		m_environment = previous;
@@ -218,6 +223,17 @@ void Interpreter::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(stmt->m_expr));
 	std::cout << stringify(value) << std::endl;
+}
+
+void Interpreter::visitReturnStmt(const std::shared_ptr<ReturnStmt>& stmt)
+{
+	std::shared_ptr<Token> value = nullptr;
+	if(stmt->m_value != nullptr)
+	{
+		value = std::static_pointer_cast<Token>(evaluate(stmt->m_value));
+	}
+
+	throw ReturnException(value);
 }
 
 void Interpreter::visitVarStmt(const std::shared_ptr<VarStmt>& stmt)

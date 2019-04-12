@@ -26,6 +26,7 @@ public:
 	void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) override;
 	void visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt) override;
 	void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) override;
+	void visitReturnStmt(const std::shared_ptr<ReturnStmt>& stmt) override;
 	void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) override;
 	void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) override;
 

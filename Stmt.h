@@ -11,6 +11,7 @@ class ExpressionStmt;
 class IfStmt;
 class FunctionStmt;
 class PrintStmt;
+class ReturnStmt;
 class VarStmt;
 class WhileStmt;
 class Expr;
@@ -22,6 +23,7 @@ public:
     virtual void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) = 0;
     virtual void visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt) = 0;
     virtual void visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt) = 0;
+    virtual void visitReturnStmt(const std::shared_ptr<ReturnStmt>& stmt) = 0;
     virtual void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) = 0;
     virtual void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) = 0;
 };
@@ -102,6 +104,21 @@ class PrintStmt : public Stmt {
     }
 
     std::shared_ptr<Expr> m_expr;
+};
+
+class ReturnStmt : public Stmt {
+    public:
+    ReturnStmt( Token keyword, std::shared_ptr<Expr> value ) 
+      : m_keyword(keyword),
+      m_value(value)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitReturnStmt(std::make_shared<ReturnStmt>(*this));
+    }
+
+    Token m_keyword;
+    std::shared_ptr<Expr> m_value;
 };
 
 class VarStmt : public Stmt {
