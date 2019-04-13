@@ -41,7 +41,7 @@ std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryE
 	switch (expr->m_op.GetType())
 	{
 		case ETokenType::BANG_EQUAL:
-				return std::make_shared<bool>(!isEqual(left, right));
+			return std::make_shared<bool>(!isEqual(left, right));
 		case ETokenType::EQUAL_EQUAL:
 			return std::make_shared<bool>(isEqual(left, right));
 	}
@@ -215,7 +215,7 @@ void Interpreter::visitIfStmt(const std::shared_ptr<IfStmt>& stmt)
 
 void Interpreter::visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt)
 {
-	std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt);
+	std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt, m_environment);
 	m_environment->Define(stmt->m_name.GetLexeme(), function);
 }
 
@@ -281,6 +281,9 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt)
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)
 {
 	// TODO: Account for type differences
+	//return (!strcmp(left->GetLexeme().c_str(), right->GetLexeme().c_str()));
+	std::cout << "left = " << left->GetLexeme() << " right = " << right->GetLexeme() << " result = " << (left->GetLexeme() == right->GetLexeme()) <<"\n";
+
 	return (left->GetLexeme() == right->GetLexeme());
 }
 
