@@ -1,3 +1,4 @@
+
 fun makePoint(x, y) {
   fun closure(method) {
     if (method == "x") return x;

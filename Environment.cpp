@@ -17,7 +17,13 @@ Environment::~Environment()
 
 void Environment::Define(std::string name, std::shared_ptr<void> value)
 {
-	m_varToTokenMap.insert(std::make_pair(name, value));
+	auto iter = m_varToTokenMap.insert(std::make_pair(name, value));
+	if (!iter.second)
+	{
+		// Variable already exists, need to assign instead
+		auto mapIter = m_varToTokenMap.find(name);
+		mapIter->second = value;
+	}
 }
 
 void Environment::Assign(Token name, std::shared_ptr<void> value)

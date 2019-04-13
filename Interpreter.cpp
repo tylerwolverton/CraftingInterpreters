@@ -280,10 +280,6 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt)
 
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)
 {
-	// TODO: Account for type differences
-	//return (!strcmp(left->GetLexeme().c_str(), right->GetLexeme().c_str()));
-	std::cout << "left = " << left->GetLexeme() << " right = " << right->GetLexeme() << " result = " << (left->GetLexeme() == right->GetLexeme()) <<"\n";
-
 	return (left->GetLexeme() == right->GetLexeme());
 }
 
