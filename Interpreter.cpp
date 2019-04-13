@@ -41,9 +41,9 @@ std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryE
 	switch (expr->m_op.GetType())
 	{
 		case ETokenType::BANG_EQUAL:
-			return std::make_shared<bool>(!isEqual(left, right));
+			return createTruthToken(!isEqual(left, right), expr->m_op.GetLineNum());
 		case ETokenType::EQUAL_EQUAL:
-			return std::make_shared<bool>(isEqual(left, right));
+			return createTruthToken(isEqual(left, right), expr->m_op.GetLineNum());
 	}
 
 	if (left->GetType() == ETokenType::NUMBER
