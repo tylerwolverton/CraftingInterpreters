@@ -29,7 +29,16 @@ std::shared_ptr<void> Interpreter::visitAssignExpr(const std::shared_ptr<AssignE
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr->m_value));
 
-	m_environment->Assign(expr->m_name, value);
+	auto iter = m_locals.find(expr);
+	if (iter != m_locals.end())
+	{
+		m_environment->AssignAt(iter->second, expr->m_name, value);
+	}
+	else
+	{
+	    m_globalEnv->Assign(expr->m_name, value);
+	}
+
 	return value;
 }
 
@@ -146,6 +155,9 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 	//	//throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
 	//}
 	
+	// TODO: Supprt ananymous functions by checking for functions or tokens
+	// Or maybe give anonmous functios a randomly generated name and then look them up
+
 	std::vector<std::shared_ptr<Token>> args;
 	for (const auto& arg : expr->m_arguments)
 	{
@@ -163,7 +175,20 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
-	return m_environment->Get(expr->m_name);
+	return lookupVar(expr->m_name, expr);
+}
+
+std::shared_ptr<void> Interpreter::lookupVar(Token name, const std::shared_ptr<Expr>& expr)
+{
+	auto iter = m_locals.find(expr);
+	if (iter != m_locals.end())
+	{
+		return m_environment->GetAt(iter->second, name);
+	}
+	else
+	{
+		return m_globalEnv->Get(name);
+	}
 }
 
 void Interpreter::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
@@ -276,6 +301,11 @@ bool Interpreter::isTruthy(std::shared_ptr<Token> token)
 void Interpreter::execute(std::shared_ptr<Stmt> stmt) 
 {
 	stmt->accept(*this);
+}
+
+void Interpreter::Resolve(const std::shared_ptr<Expr>& expr, int depth)
+{
+	m_locals[expr] = depth;
 }
 
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)

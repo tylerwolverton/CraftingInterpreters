@@ -44,6 +44,11 @@ void Environment::Assign(Token name, std::shared_ptr<void> value)
 	throw RuntimeError(name, "Undefined variable '" + name.GetLexeme() + "'.");
 }
 
+void Environment::AssignAt(int dist, Token name, std::shared_ptr<void> value)
+{
+	ancestor(dist)->m_varToTokenMap[name.GetLexeme()] = value;
+}
+
 std::shared_ptr<void> Environment::Get(Token name)
 {
 	auto mapIter = m_varToTokenMap.find(name.GetLexeme());
@@ -58,4 +63,21 @@ std::shared_ptr<void> Environment::Get(Token name)
 	}
 
 	throw RuntimeError(name, "Undefined variable '" + name.GetLexeme() + "'.");
+}
+
+std::shared_ptr<void> Environment::GetAt(int dist, Token name)
+{
+	// The resolver already found the value so it can be returned without checking
+	return (ancestor(dist)->m_varToTokenMap.find(name.GetLexeme()))->second;
+}
+
+std::shared_ptr<Environment> Environment::ancestor(int dist)
+{
+	std::shared_ptr<Environment> environment = std::make_shared<Environment>(*this);
+	for (int i = 0; i < dist; i++) 
+	{
+		environment = environment->m_enclosingEnv;
+	}
+
+	return environment;
 }

@@ -1,18 +1,19 @@
 #pragma once
+#include "Types.h"
 #include "Expr.h"
 #include "Stmt.h"
-#include "Environment.h"
+#include "Interpreter.h"
 #include <vector>
 #include <map>
+#include <memory>
 
-class Interpreter : public ExprVisitor, public StmtVisitor
+class Resolver : public ExprVisitor, public StmtVisitor
 {
 public:
-	Interpreter();
-	~Interpreter();
+	Resolver(const Interpreter& interpreter);
+	~Resolver();
 
-	void Interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
-	void Resolve(const std::shared_ptr<Expr>& expr, int depth);
+	void Resolve(const std::vector<std::shared_ptr<Stmt>>& statements);
 
 	std::shared_ptr<void> visitAssignExpr(const std::shared_ptr<AssignExpr>& expr) override;
 	std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) override;
@@ -32,27 +33,27 @@ public:
 	void visitVarStmt(const std::shared_ptr<VarStmt>& stmt) override;
 	void visitWhileStmt(const std::shared_ptr<WhileStmt>& stmt) override;
 
-	void executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment);
-
-	std::shared_ptr<Environment> GetGlobalEnv() { return m_globalEnv; }
-
 private:
-	std::shared_ptr<Environment> m_globalEnv;
-	std::shared_ptr<Environment> m_environment;
-	std::map<std::shared_ptr<Expr>, int> m_locals;
+	enum EFunctionType
+	{
+		NONE,
+		FUNCTION
+	};
 
-	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);
-	void execute(std::shared_ptr<Stmt> stmt);
+	Interpreter m_interpreter;
+	EFunctionType m_curFunctionType;
 
-	bool isTruthy(std::shared_ptr<Token> token);
-	bool isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right);
+	void resolve(const std::shared_ptr<Stmt>& stmt);
+	void resolve(const std::shared_ptr<Expr>& expr);
+	void resolveLocal(const std::shared_ptr<Expr>& expr, Token name);
+	void resolveFunction(const std::shared_ptr<FunctionStmt>& function, EFunctionType type);
 
-	std::shared_ptr<Token> createTruthToken(bool value, int lineNum);
-	std::shared_ptr<Token> createNumberToken(double value, int lineNum);
-	std::shared_ptr<Token> createStringToken(std::string value, int lineNum);
+	void beginScope();
+	void endScope();
 
-	std::string stringify(std::shared_ptr<Token> value);
+	void declare(Token name);
+	void define(Token name);
 
-	std::shared_ptr<void> lookupVar(Token name, const std::shared_ptr<Expr>& expr);
+	std::vector<std::map<std::string, bool>> m_scopeStack;
 };
 

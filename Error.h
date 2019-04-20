@@ -50,6 +50,15 @@ public:
 	}
 };
 
+class ResolverError : std::nested_exception
+{
+public:
+	ResolverError(Token token, std::string msg)
+	{
+		Error::DisplayError(token, msg);
+	}
+};
+
 class ReturnException : std::nested_exception
 {
 public:

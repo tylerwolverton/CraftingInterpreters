@@ -12,3 +12,19 @@ fun makePoint(x, y) {
 var point = makePoint(2, 3);
 print point("x"); // "2".
 print point("y"); // "3".
+
+fun scope(a) {
+  var a = "local";
+  print a;
+}
+
+scope("b");
+
+fun printPoint(point)
+{
+   print point;
+}
+
+var point = 2;
+
+printPoint(point);

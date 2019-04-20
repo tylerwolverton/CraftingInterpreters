@@ -4,18 +4,32 @@
 
 #include "Scanner.h"
 #include "Parser.h"
+#include "Resolver.h"
 #include "AstPrinter.h"
 #include "Interpreter.h"
 
 bool run(std::string source) 
 {
-	auto scanner = Scanner(source);
-	auto tokens = scanner.ScanTokens();
+	try 
+	{
+		auto scanner = Scanner(source);
+		auto tokens = scanner.ScanTokens();
 
-	auto parser = Parser(tokens);
-	auto statements = parser.Parse();
+		auto parser = Parser(tokens);
 	
-	Interpreter().Interpret(statements);
+		auto statements = parser.Parse();
+
+		auto interpreter = Interpreter();
+
+		auto resolver = Resolver(interpreter);
+		resolver.Resolve(statements);
+
+		interpreter.Interpret(statements);
+	}
+	catch (...)
+	{
+		return false;
+	}
 
 	return true;
 }

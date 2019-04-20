@@ -127,6 +127,7 @@
     <ClCompile Include="LoxFunction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="Resolver.cpp" />
     <ClCompile Include="Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,7 @@
     <ClInclude Include="LoxCallable.h" />
     <ClInclude Include="LoxFunction.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="Resolver.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="Stmt.h" />
     <ClInclude Include="Types.h" />
