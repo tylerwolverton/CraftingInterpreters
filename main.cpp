@@ -19,12 +19,12 @@ bool run(std::string source)
 	
 		auto statements = parser.Parse();
 
-		auto interpreter = Interpreter();
+		auto interpreter = std::make_shared<Interpreter>();
 
 		auto resolver = Resolver(interpreter);
 		resolver.Resolve(statements);
 
-		interpreter.Interpret(statements);
+		interpreter->Interpret(statements);
 	}
 	catch (...)
 	{

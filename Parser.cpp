@@ -172,6 +172,10 @@ std::shared_ptr<Stmt> Parser::declaration()
 {
 	try 
 	{
+		if (match(std::vector<ETokenType>{ CLASS }))
+		{
+			return classDeclaration();
+		}
 		if (match(std::vector<ETokenType>{ FUN }))
 		{
 			return function("function");
@@ -188,6 +192,22 @@ std::shared_ptr<Stmt> Parser::declaration()
 		synchronize();
 		return nullptr;
 	}
+}
+
+std::shared_ptr<Stmt> Parser::classDeclaration()
+{
+	Token name = consume(IDENTIFIER, "Expect class name.");
+	consume(LEFT_BRACE, "Expect '{' before class body.");
+
+	std::vector<std::shared_ptr<FunctionStmt>> methods;
+	while (!check(RIGHT_BRACE) && !isAtEnd()) 
+	{
+		methods.push_back(std::static_pointer_cast<FunctionStmt>(function("method")));
+	}
+
+	consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+	return std::make_shared<ClassStmt>(name, methods);
 }
 
 std::shared_ptr<Stmt> Parser::function(std::string kind)
@@ -244,6 +264,11 @@ std::shared_ptr<Expr> Parser::assignment()
 		{
 			Token name = (std::static_pointer_cast<VariableExpr>(expr))->m_name;
 			return std::make_shared<AssignExpr>(name, value);
+		}
+		else if (std::dynamic_pointer_cast<GetExpr>(expr) != nullptr)
+		{
+			std::shared_ptr<GetExpr> getExpr = std::static_pointer_cast<GetExpr>(expr);
+			return std::make_shared<SetExpr>(getExpr->m_obj, getExpr->m_name, value);
 		}
 
 		ParseError(equals, "Invalid assignment target.");
@@ -358,6 +383,11 @@ std::shared_ptr<Expr> Parser::call()
 		{
 			expr = finishCall(expr);
 		}
+		else if (match(std::vector<ETokenType> { DOT }))
+		{
+			Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+			expr = std::make_shared<GetExpr>(expr, name);
+		}
 		else
 		{
 			break;
@@ -374,7 +404,12 @@ std::shared_ptr<Expr> Parser::primary()
 		return std::make_shared<LiteralExpr>(previous());
 	}
 
-	if (match(std::vector<ETokenType> {IDENTIFIER}))
+	if (match(std::vector<ETokenType> { THIS }))
+	{
+		return std::make_shared<ThisExpr>(previous());
+	}
+
+	if (match(std::vector<ETokenType> { IDENTIFIER }))
 	{
 		return std::make_shared<VariableExpr>(previous());
 	}

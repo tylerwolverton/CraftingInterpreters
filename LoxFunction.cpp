@@ -1,4 +1,5 @@
 #include "LoxFunction.h"
+#include "LoxInstance.h"
 #include "Interpreter.h"
 #include "Error.h"
 
@@ -20,4 +21,11 @@ std::shared_ptr<void> LoxFunction::Call(const std::shared_ptr<Interpreter>& inte
 	}
 
 	return nullptr;
+}
+
+std::shared_ptr<LoxFunction> LoxFunction::Bind(const std::shared_ptr<LoxInstance>& instance)
+{
+	std::shared_ptr<Environment> env = std::make_shared<Environment>(m_closure);
+	env->Define("this", instance);
+	return std::make_shared<LoxFunction>(m_declaration, env);
 }

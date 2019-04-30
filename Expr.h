@@ -9,9 +9,12 @@
 class AssignExpr;
 class BinaryExpr;
 class CallExpr;
+class GetExpr;
 class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
+class SetExpr;
+class ThisExpr;
 class UnaryExpr;
 class VariableExpr;
 
@@ -20,9 +23,12 @@ public:
     virtual std::shared_ptr<void> visitAssignExpr(const std::shared_ptr<AssignExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitBinaryExpr(const std::shared_ptr<BinaryExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitCallExpr(const std::shared_ptr<CallExpr>& expr) = 0;
+    virtual std::shared_ptr<void> visitGetExpr(const std::shared_ptr<GetExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLogicalExpr(const std::shared_ptr<LogicalExpr>& expr) = 0;
+    virtual std::shared_ptr<void> visitSetExpr(const std::shared_ptr<SetExpr>& expr) = 0;
+    virtual std::shared_ptr<void> visitThisExpr(const std::shared_ptr<ThisExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) = 0;
 };
@@ -81,6 +87,21 @@ class CallExpr : public Expr {
     std::vector<std::shared_ptr<Expr>> m_arguments;
 };
 
+class GetExpr : public Expr {
+    public:
+    GetExpr( std::shared_ptr<Expr> obj, Token name ) 
+      : m_obj(obj),
+      m_name(name)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitGetExpr(std::make_shared<GetExpr>(*this));
+    }
+
+    std::shared_ptr<Expr> m_obj;
+    Token m_name;
+};
+
 class GroupingExpr : public Expr {
     public:
     GroupingExpr( std::shared_ptr<Expr> expr ) 
@@ -122,6 +143,36 @@ class LogicalExpr : public Expr {
     std::shared_ptr<Expr> m_left;
     Token m_op;
     std::shared_ptr<Expr> m_right;
+};
+
+class SetExpr : public Expr {
+    public:
+    SetExpr( std::shared_ptr<Expr> obj, Token name, std::shared_ptr<Expr> value ) 
+      : m_obj(obj),
+      m_name(name),
+      m_value(value)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitSetExpr(std::make_shared<SetExpr>(*this));
+    }
+
+    std::shared_ptr<Expr> m_obj;
+    Token m_name;
+    std::shared_ptr<Expr> m_value;
+};
+
+class ThisExpr : public Expr {
+    public:
+    ThisExpr( Token keyword ) 
+      : m_keyword(keyword)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitThisExpr(std::make_shared<ThisExpr>(*this));
+    }
+
+    Token m_keyword;
 };
 
 class UnaryExpr : public Expr {

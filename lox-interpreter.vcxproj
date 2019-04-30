@@ -124,7 +124,9 @@
     <ClCompile Include="AstPrinter.cpp" />
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="LoxClass.cpp" />
     <ClCompile Include="LoxFunction.cpp" />
+    <ClCompile Include="LoxInstance.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Resolver.cpp" />
@@ -137,7 +139,9 @@
     <ClInclude Include="Expr.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="LoxCallable.h" />
+    <ClInclude Include="LoxClass.h" />
     <ClInclude Include="LoxFunction.h" />
+    <ClInclude Include="LoxInstance.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Resolver.h" />
     <ClInclude Include="Scanner.h" />

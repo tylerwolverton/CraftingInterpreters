@@ -4,6 +4,7 @@
 #include "Environment.h"
 
 class Interpreter;
+class LoxInstance;
 
 class LoxFunction : LoxCallable
 {
@@ -16,6 +17,8 @@ public:
 	std::shared_ptr<void> Call(const std::shared_ptr<Interpreter>& interpreter, std::vector<std::shared_ptr<Token>> args) override;
 
 	const int GetArity() const override { return m_declaration->m_params.size(); }
+
+	std::shared_ptr<LoxFunction> Bind(const std::shared_ptr<LoxInstance>& instance);
 
 private:
 	std::shared_ptr<FunctionStmt> m_declaration;

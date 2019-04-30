@@ -144,9 +144,12 @@ int main(int argc, char *argv[])
 		"AssignExpr   : Token name, std::shared_ptr<Expr> value",
 		"BinaryExpr   : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"CallExpr     : std::shared_ptr<Expr> callee, Token paren, std::vector<std::shared_ptr<Expr>> arguments",
+		"GetExpr      : std::shared_ptr<Expr> obj, Token name",
 		"GroupingExpr : std::shared_ptr<Expr> expr",
 		"LiteralExpr  : Token literal",
 	    "LogicalExpr  : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
+		"SetExpr      : std::shared_ptr<Expr> obj, Token name, std::shared_ptr<Expr> value",
+		"ThisExpr     : Token keyword",
 		"UnaryExpr    : Token op, std::shared_ptr<Expr> right",
 		"VariableExpr : Token name"
 	}) == false)
@@ -157,6 +160,7 @@ int main(int argc, char *argv[])
 
 	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
 		"BlockStmt      : std::vector<std::shared_ptr<Stmt>> statements",
+		"ClassStmt      : Token name, std::vector<std::shared_ptr<FunctionStmt>> methods",
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
 		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
 		"FunctionStmt   : Token name, std::vector<std::shared_ptr<Token>> params, std::shared_ptr<BlockStmt> body",

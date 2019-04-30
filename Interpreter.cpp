@@ -1,6 +1,8 @@
 #include "Interpreter.h"
 #include "Error.h"
 #include "LoxCallable.h"
+#include "LoxClass.h"
+#include "LoxInstance.h"
 #include "LoxFunction.h"
 
 #include <iostream>
@@ -20,7 +22,6 @@ void Interpreter::Interpret(const std::vector<std::shared_ptr<Stmt>>& statements
 {
 	for (auto stmt : statements)
 	{
-		//std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr));
 		execute(stmt);
 	}
 }
@@ -29,7 +30,8 @@ std::shared_ptr<void> Interpreter::visitAssignExpr(const std::shared_ptr<AssignE
 {
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr->m_value));
 
-	auto iter = m_locals.find(expr);
+	auto iter = m_locals.find(value->GetLexeme());
+	//auto iter = m_locals.find(expr);
 	if (iter != m_locals.end())
 	{
 		m_environment->AssignAt(iter->second, expr->m_name, value);
@@ -88,6 +90,18 @@ std::shared_ptr<void> Interpreter::visitBinaryExpr(const std::shared_ptr<BinaryE
 
 	// Unreachable
 	return nullptr;
+}
+
+std::shared_ptr<void> Interpreter::visitGetExpr(const std::shared_ptr<GetExpr>& expr)
+{
+	std::shared_ptr<LoxInstance> object = std::static_pointer_cast<LoxInstance>(evaluate(expr->m_obj));
+
+	if (object == nullptr)
+	{
+		throw RuntimeError(expr->m_name, "Only instances have properties.");
+	}
+
+	return object->GetField(expr->m_name);
 }
 
 std::shared_ptr<void> Interpreter::visitGroupingExpr(const std::shared_ptr<GroupingExpr>& expr)
@@ -173,6 +187,26 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 	return function->Call(std::make_shared<Interpreter>(*this), args);
 }
 
+std::shared_ptr<void> Interpreter::visitSetExpr(const std::shared_ptr<SetExpr>& expr)
+{
+	// TODO: Find a better way to do this
+	std::shared_ptr<LoxInstance> object = std::static_pointer_cast<LoxInstance>(evaluate(expr->m_obj));
+	if (object == nullptr)
+	{
+		throw RuntimeError(expr->m_name, "Only instances have fields.");
+	}
+
+	std::shared_ptr<void> value = evaluate(expr->m_value);
+	object->SetField(expr->m_name, value);
+
+	return value;
+}
+
+std::shared_ptr<void> Interpreter::visitThisExpr(const std::shared_ptr<ThisExpr>& expr)
+{
+	return lookupVar(expr->m_keyword, expr);
+}
+
 std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
 	return lookupVar(expr->m_name, expr);
@@ -180,7 +214,8 @@ std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<Varia
 
 std::shared_ptr<void> Interpreter::lookupVar(Token name, const std::shared_ptr<Expr>& expr)
 {
-	auto iter = m_locals.find(expr);
+	//auto iter = m_locals.find(expr);
+	auto iter = m_locals.find(name.GetLexeme());
 	if (iter != m_locals.end())
 	{
 		return m_environment->GetAt(iter->second, name);
@@ -219,6 +254,19 @@ void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, st
 	{
 		m_environment = previous;
 	}
+}
+
+void Interpreter::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
+{
+	m_environment->Define(stmt->m_name.GetLexeme(), nullptr);
+
+	std::map<std::string, std::shared_ptr<LoxFunction>> methods;
+	for (const auto& method : stmt->m_methods)
+	{
+		methods.insert(std::make_pair<std::string, std::shared_ptr<LoxFunction>>(method->m_name.GetLexeme(), std::make_shared<LoxFunction>(method, m_environment)));
+	}
+
+	m_environment->Assign(stmt->m_name, std::make_shared<LoxClass>(stmt->m_name.GetLexeme(), methods));
 }
 
 void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt)
@@ -303,9 +351,14 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt)
 	stmt->accept(*this);
 }
 
-void Interpreter::Resolve(const std::shared_ptr<Expr>& expr, int depth)
+//void Interpreter::Resolve(const std::shared_ptr<Expr>& expr, int depth)
+//{
+//	m_locals[expr] = depth;
+//}
+
+void Interpreter::Resolve(Token name, int depth)
 {
-	m_locals[expr] = depth;
+	m_locals[name.GetLexeme()] = depth;
 }
 
 bool Interpreter::isEqual(std::shared_ptr<Token> left, std::shared_ptr<Token> right)

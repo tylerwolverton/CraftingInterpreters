@@ -7,6 +7,7 @@
 // If changes are needed, modify ExprGenerator/main.cpp 
 
 class BlockStmt;
+class ClassStmt;
 class ExpressionStmt;
 class IfStmt;
 class FunctionStmt;
@@ -19,6 +20,7 @@ class Expr;
 class StmtVisitor { 
 public:
     virtual void visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt) = 0;
+    virtual void visitClassStmt(const std::shared_ptr<ClassStmt>& stmt) = 0;
     virtual void visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt) = 0;
     virtual void visitIfStmt(const std::shared_ptr<IfStmt>& stmt) = 0;
     virtual void visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt) = 0;
@@ -44,6 +46,21 @@ class BlockStmt : public Stmt {
     }
 
     std::vector<std::shared_ptr<Stmt>> m_statements;
+};
+
+class ClassStmt : public Stmt {
+    public:
+    ClassStmt( Token name, std::vector<std::shared_ptr<FunctionStmt>> methods ) 
+      : m_name(name),
+      m_methods(methods)
+        {}
+
+    void accept(StmtVisitor& visitor) override {
+        return visitor.visitClassStmt(std::make_shared<ClassStmt>(*this));
+    }
+
+    Token m_name;
+    std::vector<std::shared_ptr<FunctionStmt>> m_methods;
 };
 
 class ExpressionStmt : public Stmt {

@@ -29,6 +29,7 @@ private:
 	std::shared_ptr<Stmt> expressionStatement();
 	
 	std::shared_ptr<Stmt> declaration();
+	std::shared_ptr<Stmt> classDeclaration();
 	std::shared_ptr<Stmt> function(std::string kind);
 	std::shared_ptr<Stmt> varDeclaration();
 

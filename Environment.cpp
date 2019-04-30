@@ -74,7 +74,7 @@ std::shared_ptr<void> Environment::GetAt(int dist, Token name)
 std::shared_ptr<Environment> Environment::ancestor(int dist)
 {
 	std::shared_ptr<Environment> environment = std::make_shared<Environment>(*this);
-	for (int i = 0; i < dist; i++) 
+	for (int i = 0; i < dist - 1; i++) 
 	{
 		environment = environment->m_enclosingEnv;
 	}

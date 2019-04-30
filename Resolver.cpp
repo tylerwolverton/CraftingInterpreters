@@ -1,11 +1,15 @@
 #include "Resolver.h"
+#include "Interpreter.h"
 #include "Error.h"
 
-Resolver::Resolver(const Interpreter& interpreter)
+Resolver::Resolver(const std::shared_ptr<Interpreter>& interpreter)
 	: m_interpreter(interpreter),
 	  m_scopeStack(std::vector<std::map<std::string, bool>>()),
-	  m_curFunctionType(EFunctionType::NONE)
+	  m_curFunctionType(EFunctionType::NONE_FUNC),
+	  m_curClassType(EClassType::NONE_CLASS)
 {
+	// global scope
+	//beginScope();
 }
 
 Resolver::~Resolver()
@@ -32,6 +36,13 @@ std::shared_ptr<void> Resolver::visitBinaryExpr(const std::shared_ptr<BinaryExpr
 {
 	resolve(expr->m_left);
 	resolve(expr->m_right);
+
+	return nullptr;
+}
+
+std::shared_ptr<void> Resolver::visitGetExpr(const std::shared_ptr<GetExpr>& expr)
+{
+	resolve(expr->m_obj);
 
 	return nullptr;
 }
@@ -75,6 +86,27 @@ std::shared_ptr<void> Resolver::visitCallExpr(const std::shared_ptr<CallExpr>& e
 	return nullptr;
 }
 
+std::shared_ptr<void> Resolver::visitSetExpr(const std::shared_ptr<SetExpr>& expr)
+{
+	resolve(expr->m_value);
+	resolve(expr->m_obj);
+
+	return nullptr;
+}
+
+std::shared_ptr<void> Resolver::visitThisExpr(const std::shared_ptr<ThisExpr>& expr)
+{
+	if (m_curClassType == EClassType::NONE_CLASS)
+	{
+		throw RuntimeError(expr->m_keyword, "Cannot use 'this' outside of a class.");
+		return nullptr;
+	}
+
+	resolveLocal(expr, expr->m_keyword);
+
+	return nullptr;
+}
+
 std::shared_ptr<void> Resolver::visitVariableExpr(const std::shared_ptr<VariableExpr>& expr)
 {
 	if (!m_scopeStack.empty())
@@ -102,6 +134,27 @@ void Resolver::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
 void Resolver::beginScope()
 {
 	m_scopeStack.push_back(std::map<std::string, bool>());
+}
+
+void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
+{
+	EClassType enclosingClass = m_curClassType;
+	m_curClassType = EClassType::CLASS;
+	declare(stmt->m_name);
+	define(stmt->m_name);
+
+	beginScope();
+	m_scopeStack.back().insert(std::make_pair<std::string, bool>("this", true));
+
+	for (const auto& method : stmt->m_methods) 
+	{
+		EFunctionType declaration = EFunctionType::METHOD;
+		resolveFunction(method, declaration);
+	}
+
+	endScope();
+
+	m_curClassType = enclosingClass;
 }
 
 void Resolver::endScope()
@@ -136,7 +189,7 @@ void Resolver::visitPrintStmt(const std::shared_ptr<PrintStmt>& stmt)
 
 void Resolver::visitReturnStmt(const std::shared_ptr<ReturnStmt>& stmt)
 {
-	if (m_curFunctionType == EFunctionType::NONE)
+	if (m_curFunctionType == EFunctionType::NONE_FUNC)
 	{
 		throw ResolverError(stmt->m_keyword, "Cannot return outside function.");
 	}
@@ -198,7 +251,8 @@ void Resolver::resolveLocal(const std::shared_ptr<Expr>& expr, Token name)
 		auto iter = m_scopeStack[i].find(name.GetLexeme());
 		if (iter != m_scopeStack[i].end())
 		{
-			m_interpreter.Resolve(expr, m_scopeStack.size() - 1 - i);
+			//m_interpreter->Resolve(expr, m_scopeStack.size() - 1 - i);
+			m_interpreter->Resolve(name, m_scopeStack.size() - 1 - i);
 			return;
 		}
 	}
@@ -209,7 +263,7 @@ void Resolver::resolveFunction(const std::shared_ptr<FunctionStmt>& function, Re
 	EFunctionType enclosingFunctionType = m_curFunctionType;
 	m_curFunctionType = type;
 
-	beginScope();
+	//beginScope();
 	for (const auto& param : function->m_params)
 	{
 		declare(*param);
@@ -217,7 +271,7 @@ void Resolver::resolveFunction(const std::shared_ptr<FunctionStmt>& function, Re
 	}
 
 	resolve(function->m_body);
-	endScope();
+	//endScope();
 
 	m_curFunctionType = enclosingFunctionType;
 }
