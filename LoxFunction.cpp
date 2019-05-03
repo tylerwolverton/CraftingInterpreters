@@ -5,7 +5,7 @@
 
 std::shared_ptr<void> LoxFunction::Call(const std::shared_ptr<Interpreter>& interpreter, std::vector<std::shared_ptr<Token>> args)
 {
-	std::shared_ptr<Environment> environment = m_closure;
+	std::shared_ptr<Environment> environment = std::make_shared<Environment>(m_closure);
 	for (int i = 0; i < m_declaration->m_params.size(); i++) 
 	{
 		environment->Define(m_declaration->m_params[i]->GetLexeme(), args[i]);

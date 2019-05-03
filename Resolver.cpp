@@ -131,11 +131,6 @@ void Resolver::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
 	endScope();
 }
 
-void Resolver::beginScope()
-{
-	m_scopeStack.push_back(std::map<std::string, bool>());
-}
-
 void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 {
 	EClassType enclosingClass = m_curClassType;
@@ -155,6 +150,11 @@ void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 	endScope();
 
 	m_curClassType = enclosingClass;
+}
+
+void Resolver::beginScope()
+{
+	m_scopeStack.push_back(std::map<std::string, bool>());
 }
 
 void Resolver::endScope()
@@ -263,7 +263,7 @@ void Resolver::resolveFunction(const std::shared_ptr<FunctionStmt>& function, Re
 	EFunctionType enclosingFunctionType = m_curFunctionType;
 	m_curFunctionType = type;
 
-	//beginScope();
+	beginScope();
 	for (const auto& param : function->m_params)
 	{
 		declare(*param);
@@ -271,7 +271,7 @@ void Resolver::resolveFunction(const std::shared_ptr<FunctionStmt>& function, Re
 	}
 
 	resolve(function->m_body);
-	//endScope();
+	endScope();
 
 	m_curFunctionType = enclosingFunctionType;
 }

@@ -228,7 +228,7 @@ std::shared_ptr<void> Interpreter::lookupVar(Token name, const std::shared_ptr<E
 
 void Interpreter::visitBlockStmt(const std::shared_ptr<BlockStmt>& stmt)
 {
-	executeBlock(stmt->m_statements, std::make_shared<Environment>(std::make_shared<Environment>(m_environment)));
+	executeBlock(stmt->m_statements, m_environment);
 }
 
 void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment)
@@ -236,7 +236,7 @@ void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, st
 	std::shared_ptr<Environment> previous = m_environment;
 	try 
 	{
-		m_environment = environment;
+		m_environment = std::make_shared<Environment>(environment);
 
 		for (const auto& statement : statements) 
 		{
