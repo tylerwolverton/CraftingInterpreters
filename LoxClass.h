@@ -19,7 +19,7 @@ public:
 
 	std::shared_ptr<void> Call(const std::shared_ptr<Interpreter>& interpreter, std::vector<std::shared_ptr<Token>> args) override;
 
-	const int GetArity() const override { return 0; };
+	const int GetArity() override;
 
 	std::shared_ptr<LoxFunction> FindMethod(std::string name);
 

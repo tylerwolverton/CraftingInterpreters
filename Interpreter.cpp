@@ -263,7 +263,7 @@ void Interpreter::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 	std::map<std::string, std::shared_ptr<LoxFunction>> methods;
 	for (const auto& method : stmt->m_methods)
 	{
-		methods.insert(std::make_pair<std::string, std::shared_ptr<LoxFunction>>(method->m_name.GetLexeme(), std::make_shared<LoxFunction>(method, m_environment)));
+		methods.insert(std::make_pair<std::string, std::shared_ptr<LoxFunction>>(method->m_name.GetLexeme(), std::make_shared<LoxFunction>(method, m_environment, method->m_name.GetLexeme() == std::string("init"))));
 	}
 
 	m_environment->Assign(stmt->m_name, std::make_shared<LoxClass>(stmt->m_name.GetLexeme(), methods));
@@ -288,7 +288,7 @@ void Interpreter::visitIfStmt(const std::shared_ptr<IfStmt>& stmt)
 
 void Interpreter::visitFunctionStmt(const std::shared_ptr<FunctionStmt>& stmt)
 {
-	std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt, m_environment);
+	std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt, m_environment, false);
 	m_environment->Define(stmt->m_name.GetLexeme(), function);
 }
 

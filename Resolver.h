@@ -43,6 +43,7 @@ private:
 	{
 		NONE_FUNC,
 		FUNCTION,
+		INITIALIZER,
 		METHOD
 	};
 

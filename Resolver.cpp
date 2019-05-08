@@ -8,8 +8,6 @@ Resolver::Resolver(const std::shared_ptr<Interpreter>& interpreter)
 	  m_curFunctionType(EFunctionType::NONE_FUNC),
 	  m_curClassType(EClassType::NONE_CLASS)
 {
-	// global scope
-	//beginScope();
 }
 
 Resolver::~Resolver()
@@ -144,6 +142,10 @@ void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 	for (const auto& method : stmt->m_methods) 
 	{
 		EFunctionType declaration = EFunctionType::METHOD;
+		if (method->m_name.GetLexeme() == std::string("init"))
+		{
+			declaration = EFunctionType::INITIALIZER;
+		}
 		resolveFunction(method, declaration);
 	}
 
@@ -196,6 +198,11 @@ void Resolver::visitReturnStmt(const std::shared_ptr<ReturnStmt>& stmt)
 
 	if (stmt->m_value != nullptr)
 	{
+		if (m_curFunctionType == EFunctionType::INITIALIZER) 
+		{
+			throw ResolverError(stmt->m_keyword, "Cannot return a value from an initializer.");
+		}
+
 		resolve(stmt->m_value);
 	}
 }

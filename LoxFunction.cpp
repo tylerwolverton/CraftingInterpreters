@@ -17,9 +17,18 @@ std::shared_ptr<void> LoxFunction::Call(const std::shared_ptr<Interpreter>& inte
 	}
 	catch (ReturnException retEx)
 	{
+		if (m_isInitializer)
+		{
+			return m_closure->GetAt(0, Token(THIS, "this", 0));
+		}
+
 		return retEx.GetValue();
 	}
 
+	if (m_isInitializer)
+	{
+		return m_closure->GetAt(0, Token(THIS, "this", 0));
+	}
 	return nullptr;
 }
 
@@ -27,5 +36,5 @@ std::shared_ptr<LoxFunction> LoxFunction::Bind(const std::shared_ptr<LoxInstance
 {
 	std::shared_ptr<Environment> env = std::make_shared<Environment>(m_closure);
 	env->Define("this", instance);
-	return std::make_shared<LoxFunction>(m_declaration, env);
+	return std::make_shared<LoxFunction>(m_declaration, env, m_isInitializer);
 }
