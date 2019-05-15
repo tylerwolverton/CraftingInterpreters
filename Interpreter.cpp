@@ -202,6 +202,29 @@ std::shared_ptr<void> Interpreter::visitSetExpr(const std::shared_ptr<SetExpr>& 
 	return value;
 }
 
+std::shared_ptr<void> Interpreter::visitSuperExpr(const std::shared_ptr<SuperExpr>& expr)
+{
+	auto distIter = m_locals.find("super");
+	if (distIter == m_locals.end())
+	{
+		throw RuntimeError(expr->m_keyword, "Variable is not a local variable.");
+	}
+
+	int dist = distIter->second;
+	std::shared_ptr<LoxClass> superclass = std::static_pointer_cast<LoxClass>(m_environment->GetAt(dist, expr->m_keyword));
+
+	// "this" is always one level nearer than "super"'s environment.
+	std::shared_ptr <LoxInstance> object = std::static_pointer_cast<LoxInstance>(m_environment->GetAt(dist - 1, Token(THIS, std::string("this"), expr->m_keyword.GetLineNum())));
+
+	std::shared_ptr<LoxFunction> method = superclass->FindMethod(expr->m_method.GetLexeme());
+	if (method == nullptr) 
+	{
+		throw RuntimeError(expr->m_method,	"Undefined property '" + expr->m_method.GetLexeme() + "'.");
+	}
+
+	return method->Bind(object);
+}
+
 std::shared_ptr<void> Interpreter::visitThisExpr(const std::shared_ptr<ThisExpr>& expr)
 {
 	return lookupVar(expr->m_keyword, expr);
@@ -258,7 +281,23 @@ void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, st
 
 void Interpreter::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 {
+	std::shared_ptr<LoxClass> superclass = nullptr;
+	if (stmt->m_superclass != nullptr)
+	{
+		superclass = std::static_pointer_cast<LoxClass>(evaluate(stmt->m_superclass));
+		if (superclass == nullptr)
+		{
+			throw RuntimeError(stmt->m_superclass->m_name, "Superclass must be a class.");
+		}
+	}
+
 	m_environment->Define(stmt->m_name.GetLexeme(), nullptr);
+
+	if (stmt->m_superclass != nullptr)
+	{
+		m_environment = std::make_shared<Environment>(m_environment);
+		m_environment->Define("super", superclass);
+	}
 
 	std::map<std::string, std::shared_ptr<LoxFunction>> methods;
 	for (const auto& method : stmt->m_methods)
@@ -266,7 +305,12 @@ void Interpreter::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 		methods.insert(std::make_pair<std::string, std::shared_ptr<LoxFunction>>(method->m_name.GetLexeme(), std::make_shared<LoxFunction>(method, m_environment, method->m_name.GetLexeme() == std::string("init"))));
 	}
 
-	m_environment->Assign(stmt->m_name, std::make_shared<LoxClass>(stmt->m_name.GetLexeme(), methods));
+	if (stmt->m_superclass != nullptr)
+	{
+		m_environment = m_environment->GetEnclosingEnv();
+	}
+
+	m_environment->Assign(stmt->m_name, std::make_shared<LoxClass>(stmt->m_name.GetLexeme(), superclass, methods));
 }
 
 void Interpreter::visitExpressionStmt(const std::shared_ptr<ExpressionStmt>& stmt)
@@ -350,11 +394,6 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt)
 {
 	stmt->accept(*this);
 }
-
-//void Interpreter::Resolve(const std::shared_ptr<Expr>& expr, int depth)
-//{
-//	m_locals[expr] = depth;
-//}
 
 void Interpreter::Resolve(Token name, int depth)
 {

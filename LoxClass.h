@@ -6,8 +6,9 @@
 class LoxClass : LoxCallable
 {
 public:
-	LoxClass(std::string name, const std::map<std::string, std::shared_ptr<LoxFunction>>& methods)
+	LoxClass(std::string name, std::shared_ptr<LoxClass> superclass, const std::map<std::string, std::shared_ptr<LoxFunction>>& methods)
 		: m_name(name),
+		  m_superclass(superclass),
 		  m_methods(methods)
 	{}
 	virtual ~LoxClass() {}
@@ -25,6 +26,7 @@ public:
 
 private:
 	std::string m_name;
+	std::shared_ptr<LoxClass> m_superclass;
 	std::map<std::string, std::shared_ptr<LoxFunction>> m_methods;
 };
 

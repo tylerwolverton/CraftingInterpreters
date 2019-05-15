@@ -92,6 +92,21 @@ std::shared_ptr<void> Resolver::visitSetExpr(const std::shared_ptr<SetExpr>& exp
 	return nullptr;
 }
 
+std::shared_ptr<void> Resolver::visitSuperExpr(const std::shared_ptr<SuperExpr>& expr)
+{
+	if (m_curClassType == EClassType::NONE_CLASS)
+	{
+		throw ResolverError(expr->m_keyword, "Cannot use 'super' outside of a class.");
+	}
+	else if (m_curClassType == EClassType::CLASS)
+	{
+		throw ResolverError(expr->m_keyword, "Cannot use 'super' in a class with no superclass.");
+	}
+
+	resolveLocal(expr, expr->m_keyword);
+	return nullptr;
+}
+
 std::shared_ptr<void> Resolver::visitThisExpr(const std::shared_ptr<ThisExpr>& expr)
 {
 	if (m_curClassType == EClassType::NONE_CLASS)
@@ -136,6 +151,21 @@ void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 	declare(stmt->m_name);
 	define(stmt->m_name);
 
+	if (stmt->m_superclass != nullptr
+		&& stmt->m_name.GetLexeme() == stmt->m_superclass->m_name.GetLexeme())
+	{
+		throw ResolverError(stmt->m_superclass->m_name, "A class cannot inherit from itself.");
+	}
+
+	if (stmt->m_superclass != nullptr)
+	{
+		m_curClassType = EClassType::SUBCLASS;
+		resolve(stmt->m_superclass);
+		
+		beginScope();
+		m_scopeStack.back().insert(std::make_pair<std::string, bool>("super", true));
+	}
+
 	beginScope();
 	m_scopeStack.back().insert(std::make_pair<std::string, bool>("this", true));
 
@@ -150,6 +180,11 @@ void Resolver::visitClassStmt(const std::shared_ptr<ClassStmt>& stmt)
 	}
 
 	endScope();
+
+	if (stmt->m_superclass != nullptr)
+	{
+		endScope();
+	}
 
 	m_curClassType = enclosingClass;
 }

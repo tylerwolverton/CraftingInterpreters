@@ -25,6 +25,7 @@ public:
 	std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) override;
 	std::shared_ptr<void> visitCallExpr(const std::shared_ptr<CallExpr>& expr) override;
 	std::shared_ptr<void> visitSetExpr(const std::shared_ptr<SetExpr>& expr) override;
+	std::shared_ptr<void> visitSuperExpr(const std::shared_ptr<SuperExpr>& expr) override;
 	std::shared_ptr<void> visitThisExpr(const std::shared_ptr<ThisExpr>& expr) override;
 	std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) override;
 
@@ -50,7 +51,8 @@ private:
 	enum EClassType
 	{
 		NONE_CLASS,
-		CLASS
+		CLASS,
+		SUBCLASS
 	};
 
 	std::shared_ptr<Interpreter> m_interpreter;

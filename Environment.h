@@ -16,6 +16,8 @@ public:
 	std::shared_ptr<void> Get(Token name);
 	std::shared_ptr<void> GetAt(int dist, Token name);
 
+	const std::shared_ptr<Environment> GetEnclosingEnv() const { return m_enclosingEnv; }
+
 private:
 	std::map<std::string, std::shared_ptr<void>> m_varToTokenMap;
 	std::shared_ptr<Environment> m_enclosingEnv;

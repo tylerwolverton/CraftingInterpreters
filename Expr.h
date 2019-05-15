@@ -14,6 +14,7 @@ class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
 class SetExpr;
+class SuperExpr;
 class ThisExpr;
 class UnaryExpr;
 class VariableExpr;
@@ -28,6 +29,7 @@ public:
     virtual std::shared_ptr<void> visitLiteralExpr(const std::shared_ptr<LiteralExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitLogicalExpr(const std::shared_ptr<LogicalExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitSetExpr(const std::shared_ptr<SetExpr>& expr) = 0;
+    virtual std::shared_ptr<void> visitSuperExpr(const std::shared_ptr<SuperExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitThisExpr(const std::shared_ptr<ThisExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitUnaryExpr(const std::shared_ptr<UnaryExpr>& expr) = 0;
     virtual std::shared_ptr<void> visitVariableExpr(const std::shared_ptr<VariableExpr>& expr) = 0;
@@ -160,6 +162,21 @@ class SetExpr : public Expr {
     std::shared_ptr<Expr> m_obj;
     Token m_name;
     std::shared_ptr<Expr> m_value;
+};
+
+class SuperExpr : public Expr {
+    public:
+    SuperExpr( Token keyword, Token method ) 
+      : m_keyword(keyword),
+      m_method(method)
+        {}
+
+    std::shared_ptr<void> accept(ExprVisitor& visitor) override {
+        return visitor.visitSuperExpr(std::make_shared<SuperExpr>(*this));
+    }
+
+    Token m_keyword;
+    Token m_method;
 };
 
 class ThisExpr : public Expr {

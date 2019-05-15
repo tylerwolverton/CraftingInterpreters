@@ -16,6 +16,7 @@ class ReturnStmt;
 class VarStmt;
 class WhileStmt;
 class Expr;
+class VariableExpr;
 
 class StmtVisitor { 
 public:
@@ -50,8 +51,9 @@ class BlockStmt : public Stmt {
 
 class ClassStmt : public Stmt {
     public:
-    ClassStmt( Token name, std::vector<std::shared_ptr<FunctionStmt>> methods ) 
+    ClassStmt( Token name, std::shared_ptr<VariableExpr> superclass, std::vector<std::shared_ptr<FunctionStmt>> methods ) 
       : m_name(name),
+      m_superclass(superclass),
       m_methods(methods)
         {}
 
@@ -60,6 +62,7 @@ class ClassStmt : public Stmt {
     }
 
     Token m_name;
+    std::shared_ptr<VariableExpr> m_superclass;
     std::vector<std::shared_ptr<FunctionStmt>> m_methods;
 };
 

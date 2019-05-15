@@ -16,12 +16,17 @@ std::shared_ptr<LoxFunction> LoxClass::FindMethod(std::string name)
 {
 	auto iter = m_methods.find(name);
 
-	if (iter == m_methods.end())
+	if (iter != m_methods.end())
 	{
-		return nullptr;
+		return iter->second;
 	}
 
-	return iter->second;
+	if (m_superclass != nullptr)
+	{
+		return m_superclass->FindMethod(name);
+	}
+
+	return nullptr;
 }
 
 const int LoxClass::GetArity()

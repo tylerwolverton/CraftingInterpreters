@@ -98,6 +98,7 @@ bool defineAst(std::string outputDir,
 	if (baseName == "Stmt")
 	{
 		buffer << "class Expr;\n";
+		buffer << "class VariableExpr;\n";
 	}
 
 	buffer << "\n";
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
 		"LiteralExpr  : Token literal",
 	    "LogicalExpr  : std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right",
 		"SetExpr      : std::shared_ptr<Expr> obj, Token name, std::shared_ptr<Expr> value",
+		"SuperExpr    : Token keyword, Token method",
 		"ThisExpr     : Token keyword",
 		"UnaryExpr    : Token op, std::shared_ptr<Expr> right",
 		"VariableExpr : Token name"
@@ -160,7 +162,7 @@ int main(int argc, char *argv[])
 
 	if (defineAst(outputDir, "Stmt", "void", std::vector<std::string>{
 		"BlockStmt      : std::vector<std::shared_ptr<Stmt>> statements",
-		"ClassStmt      : Token name, std::vector<std::shared_ptr<FunctionStmt>> methods",
+		"ClassStmt      : Token name, std::shared_ptr<VariableExpr> superclass, std::vector<std::shared_ptr<FunctionStmt>> methods",
 		"ExpressionStmt : std::shared_ptr<Expr> expr",
 		"IfStmt         : std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
 		"FunctionStmt   : Token name, std::vector<std::shared_ptr<Token>> params, std::shared_ptr<BlockStmt> body",
