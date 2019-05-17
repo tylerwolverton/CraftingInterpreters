@@ -44,13 +44,6 @@ bool runFile(char* script)
 		return false;
 	}
 
-	/*std::streampos fileSize = inFile.tellg();
-	if (fileSize < 1)
-	{
-		std::cout << "File is empty\n";
-		return;
-	}*/
-
 	std::stringstream buffer;
 	buffer << inFile.rdbuf();
 	inFile.close();
@@ -71,9 +64,5 @@ int main(int argc, char *argv[])
 		{
 			return 1;
 		}
-	}
-	else 
-	{
-		//runPrompt();
 	}
 }

@@ -10,8 +10,6 @@
 Interpreter::Interpreter()
 {
 	m_globalEnv = m_environment = std::make_shared<Environment>();
-
-//	m_globalEnv->Define("clock", std::make_shared<Token>(CLASS, LoxTime(), 0));
 }
 
 Interpreter::~Interpreter()
@@ -31,7 +29,6 @@ std::shared_ptr<void> Interpreter::visitAssignExpr(const std::shared_ptr<AssignE
 	std::shared_ptr<Token> value = std::static_pointer_cast<Token>(evaluate(expr->m_value));
 
 	auto iter = m_locals.find(value->GetLexeme());
-	//auto iter = m_locals.find(expr);
 	if (iter != m_locals.end())
 	{
 		m_environment->AssignAt(iter->second, expr->m_name, value);
@@ -169,7 +166,7 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 	//	//throw RuntimeError(expr->m_paren, "Can only call functions and classes.");
 	//}
 	
-	// TODO: Supprt ananymous functions by checking for functions or tokens
+	// TODO: Supprt anonymous functions by checking for functions or tokens
 	// Or maybe give anonmous functios a randomly generated name and then look them up
 
 	std::vector<std::shared_ptr<Token>> args;
@@ -181,7 +178,10 @@ std::shared_ptr<void> Interpreter::visitCallExpr(const std::shared_ptr<CallExpr>
 
 	if (args.size() != function->GetArity()) 
 	{
-		throw RuntimeError(expr->m_paren, "Expected " + function->GetArity());// +" arguments but got " + args.size() + ".");
+		std::string msg("Expected " + function->GetArity());
+		msg += " arguments but got " + args.size();
+		msg += ".";
+		throw RuntimeError(expr->m_paren, msg);
 	}
 
 	return function->Call(std::make_shared<Interpreter>(*this), args);
@@ -237,7 +237,6 @@ std::shared_ptr<void> Interpreter::visitVariableExpr(const std::shared_ptr<Varia
 
 std::shared_ptr<void> Interpreter::lookupVar(Token name, const std::shared_ptr<Expr>& expr)
 {
-	//auto iter = m_locals.find(expr);
 	auto iter = m_locals.find(name.GetLexeme());
 	if (iter != m_locals.end())
 	{

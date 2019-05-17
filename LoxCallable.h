@@ -18,16 +18,3 @@ public:
 private:
 	int m_arity;
 };
-
-//class LoxTime : public LoxCallable
-//{
-//public:
-//	LoxTime() {}
-//
-//	std::shared_ptr<void> Call(const std::shared_ptr<Interpreter>& interpreter, std::vector<std::shared_ptr<Token>> args) override
-//	{
-//		return std::make_shared<Token>(ETokenType::NUMBER, time(NULL), args.front()->GetLineNum());
-//	}
-//
-//	const int GetArity() const override { return 0; }
-//};

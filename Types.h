@@ -38,27 +38,6 @@ public:
 
 	double GetLexemeAsDouble() { return atof(m_lexeme.c_str()); }
 
-	/*template <typename T>
-	T GetLiteralValue()
-	{
-		if (m_type == ETokenType::IDENTIFIER)
-		{
-			return m_lexeme;
-		}
-		else if (m_type == ETokenType::STRING)
-		{
-			return m_lexeme.substr(1, m_lexeme.size() - 1);
-		}
-		else if (m_type == ETokenType::NUMBER)
-		{
-			return std::stod(lexeme);
-		}
-
-		return NULL;
-	}*/
-
-	//const std::string ToString() const { return tokenStr; }
-
 private:
 	ETokenType m_type;
 	std::string m_lexeme;

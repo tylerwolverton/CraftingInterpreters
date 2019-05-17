@@ -6,7 +6,6 @@
 
 class Scanner
 {
-// TODO: Remove the local vector and create the return on the fly
 public:
 	Scanner(std::string source);
 	~Scanner();

@@ -8,7 +8,6 @@
 class Parser
 {
 public:
-	// TODO: Remove the local vector and create the return on the fly
 	Parser(const std::shared_ptr<std::vector<Token>>& tokens);
 	~Parser();
 

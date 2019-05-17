@@ -12,7 +12,6 @@ public:
 	LoxInstance(LoxClass klass)
 		: m_klass(klass)
 	{
-		//std::cout << klass.ToString();
 	}
 	virtual ~LoxInstance() {}
 

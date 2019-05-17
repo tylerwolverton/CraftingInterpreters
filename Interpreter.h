@@ -13,7 +13,6 @@ public:
 	~Interpreter();
 
 	void Interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
-	//void Resolve(const std::shared_ptr<Expr>& expr, int depth);
 	void Resolve(Token name, int depth);
 
 	std::shared_ptr<void> visitAssignExpr(const std::shared_ptr<AssignExpr>& expr) override;
@@ -46,7 +45,6 @@ public:
 private:
 	std::shared_ptr<Environment> m_globalEnv;
 	std::shared_ptr<Environment> m_environment;
-	//std::map<std::shared_ptr<Expr>, int> m_locals;
 	std::map<std::string, int> m_locals;
 
 	std::shared_ptr<void> evaluate(std::shared_ptr<Expr> expr);

@@ -224,9 +224,12 @@ std::shared_ptr<Stmt> Parser::function(std::string kind)
 	consume(LEFT_PAREN, "Expect '(' after " + kind + " variable declaration.");
 	
 	std::vector<std::shared_ptr<Token>> parameters;
-	if (!check(RIGHT_PAREN)) {
-		do {
-			if (parameters.size() >= 8) {
+	if (!check(RIGHT_PAREN)) 
+	{
+		do 
+		{
+			if (parameters.size() >= 8) 
+			{
 				ParseError(peek(), "Cannot have more than 8 parameters.");
 			}
 
@@ -279,7 +282,7 @@ std::shared_ptr<Expr> Parser::assignment()
 			return std::make_shared<SetExpr>(getExpr->m_obj, getExpr->m_name, value);
 		}
 
-		ParseError(equals, "Invalid assignment target.");
+		throw ParseError(equals, "Invalid assignment target.");
 	}
 
 	return expr;
@@ -449,8 +452,7 @@ std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee)
 		{
 			if (arguments.size() >= 8) 
 			{
-				// TODO: Don't throw this, just report
-				throw ParseError(peek(), "Cannot have more than 8 arguments.");
+				ParseError(peek(), "Cannot have more than 8 arguments.");
 			}
 			arguments.push_back(expression());
 		} 
