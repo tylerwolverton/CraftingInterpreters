@@ -2,9 +2,14 @@ CC = gcc
 # Compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS = -g -Wall
-OBJECTS = main.o
+#  -MD   tells C preprocessor to write dependency files for headers
+CFLAGS = -g -Wall -MD
+OBJECTS = main.o chunk.o
 TARGET = lox
+# Auto create obj list from c files, 
+# isn't playing nicely with my folder structure though
+# SRCS=$(wildcard src/*.c)
+# OBJECTS=$(SRCS:.c=.o)
 
 all: $(TARGET)
 
@@ -16,8 +21,11 @@ $(TARGET): $(OBJECTS)
 # it uses automatic variables $<: the name of the prerequisite of
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
 # (see the gnu make manual section about automatic variables)
-%.o : %.c
+%.o : src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -rf *.o *.d $(TARGET)
+
+# Handle dependency files created for headers
+-include $(OBJECTS:.o=.d)
