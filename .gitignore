@@ -13,3 +13,5 @@
 *.ipch
 *.db-shm
 *.db-wal
+*.o
+*.d

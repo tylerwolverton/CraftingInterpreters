@@ -16,7 +16,7 @@ array_of_lines = File.open("Makefile", "r").readlines.map( &:chomp )
 
 array_of_lines.each { |line|
     if line[0..6] == "OBJECTS"
-        line << " " << new_obj_name
+        line << " obj/" << new_obj_name
     end
 } 
 
