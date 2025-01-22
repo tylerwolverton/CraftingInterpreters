@@ -12,5 +12,6 @@
         "utility": "cpp",
         "variant": "cpp",
         "vector": "c"
-    }
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }

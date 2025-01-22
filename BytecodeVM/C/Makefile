@@ -4,7 +4,7 @@ CC = gcc
 #  -Wall turns on most, but not all, compiler warnings
 #  -MD   tells C preprocessor to write dependency files for headers
 CFLAGS = -g -Wall -MD
-OBJECTS = obj/main.o obj/chunk.o obj/memory.o obj/debug.o
+OBJECTS = obj/main.o obj/chunk.o obj/memory.o obj/debug.o obj/value.o obj/vm.o
 TARGET = lox
 # Auto create obj list from c files, 
 # isn't playing nicely with my folder structure though
