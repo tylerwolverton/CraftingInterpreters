@@ -26,7 +26,4 @@ void resetVM();
 
 InterpretResult interpret(const char* source);
 
-void pushConstant(Value value);
-Value popConstant();
-
 #endif
