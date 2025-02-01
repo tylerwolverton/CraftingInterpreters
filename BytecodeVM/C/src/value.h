@@ -39,5 +39,6 @@ void resetValueArray(ValueArray* array);
 void appendToValueArray(ValueArray* array, Value value);
 
 void printValue(Value value);
+bool valuesEqual(Value a, Value b);
 
 #endif
