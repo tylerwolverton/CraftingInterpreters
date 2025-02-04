@@ -1,11 +1,14 @@
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "object.h"
+#include "memory.h"
 #include "value.h"
 #include "vm.h"
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 VM vm; 
 
@@ -36,6 +39,21 @@ static bool isFalsey(Value value)
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
+static void concatenate() 
+{
+    ObjString* b = AS_STRING(popConstant());
+    ObjString* a = AS_STRING(popConstant());
+
+    int length = a->length + b->length;
+    char* chars = ALLOCATE(char, length + 1);
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    ObjString* result = takeString(chars, length);
+    pushConstant(OBJ_VAL(result));
+}
+
 static void runtimeError(const char* format, ...) 
 {
     va_list args;
@@ -53,11 +71,12 @@ static void runtimeError(const char* format, ...)
 void initVM() 
 {
     resetStack();
+    vm.objects = NULL;
 }
 
 void resetVM() 
 {
-
+    freeObjects();
 }
 
 static InterpretResult run()
@@ -102,7 +121,25 @@ static InterpretResult run()
             case OP_NIL:        pushConstant(NIL_VAL); break;
             case OP_TRUE:       pushConstant(BOOL_VAL(true)); break;
             case OP_FALSE:      pushConstant(BOOL_VAL(false)); break;
-            case OP_ADD:        BINARY_OP(NUMBER_VAL, +); break;
+            case OP_ADD:        
+            {
+                if (IS_STRING(peekConstant(0)) && IS_STRING(peekConstant(1))) {
+                    concatenate();
+                } 
+                else if (IS_NUMBER(peekConstant(0)) && IS_NUMBER(peekConstant(1))) 
+                {
+                    double b = AS_NUMBER(popConstant());
+                    double a = AS_NUMBER(popConstant());
+                    pushConstant(NUMBER_VAL(a + b));
+                } 
+                else 
+                {
+                    runtimeError(
+                        "Operands must be two numbers or two strings.");
+                        return INTERPRET_RUNTIME_ERROR;
+                }
+                break;
+            }
             case OP_SUBTRACT:   BINARY_OP(NUMBER_VAL, -); break;
             case OP_MULTIPLY:   BINARY_OP(NUMBER_VAL, *); break;
             case OP_DIVIDE:     BINARY_OP(NUMBER_VAL, /); break;
