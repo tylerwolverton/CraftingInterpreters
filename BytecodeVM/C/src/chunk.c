@@ -1,21 +1,6 @@
 #include "chunk.h"
 #include "memory.h"
 
-int CHUNK_CAPACITY_INITIAL_SIZE = 8;
-int CHUNK_CAPACITY_GROWTH_FACTOR = 2;
-
-//-------------------------------------------------------------------------------
-// Static local functions
-static int growCapacity(int oldCapacity)
-{
-    if(oldCapacity < CHUNK_CAPACITY_INITIAL_SIZE)
-    {
-        return CHUNK_CAPACITY_INITIAL_SIZE;
-    }
-
-    return oldCapacity * CHUNK_CAPACITY_GROWTH_FACTOR;
-}
-
 //-------------------------------------------------------------------------------
 void initChunk(Chunk* chunk)
 {
@@ -39,8 +24,8 @@ void writeToChunk(Chunk* chunk, uint8_t byte, int lineNum)
     if(chunk->count == chunk->capacity)
     {
         int oldCapacity = chunk->capacity;
-        chunk->capacity = growCapacity(chunk->capacity);
-        chunk->code = GROW_ARRAY(uint8_t, chunk->code, oldCapacity, chunk->capacity * CHUNK_CAPACITY_GROWTH_FACTOR);
+        chunk->capacity = GROW_CAPACITY(chunk->capacity);
+        chunk->code = GROW_ARRAY(uint8_t, chunk->code, oldCapacity, chunk->capacity);
     
         chunk->lineNums = GROW_ARRAY(int, chunk->lineNums, oldCapacity, chunk->capacity);
     }

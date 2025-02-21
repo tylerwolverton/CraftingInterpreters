@@ -72,10 +72,12 @@ void initVM()
 {
     resetStack();
     vm.objects = NULL;
+    initTable(&vm.strings);
 }
 
 void resetVM() 
 {
+    freeTable(&vm.strings);
     freeObjects();
 }
 
